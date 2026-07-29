@@ -1,7 +1,7 @@
 ---
 title: ContextNest 調査メモ
 updated: 2026-07-09
-summary: ContextNestを先行仕様として読み、AgentPressへ取り込む要素と棲み分けを整理する
+summary: ContextNestを先行仕様として読み、CiteHankoへ取り込む要素と棲み分けを整理する
 ---
 
 # ContextNest 調査メモ
@@ -73,9 +73,9 @@ Mutating:
 - `context_update`
 - `context_assign_steward`
 
-AgentPressのMVPでは、このうちmutating publish/update系はそのまま採用しない。AIが新規draftやupdate proposalを作るところまではMCP toolにするが、verified化やarchiveはCLIに閉じる。
+CiteHankoのMVPでは、このうちmutating publish/update系はそのまま採用しない。AIが新規draftやupdate proposalを作るところまではMCP toolにするが、verified化やarchiveはCLIに閉じる。
 
-## Similarities with AgentPress
+## Similarities with CiteHanko
 
 - AI agent向けのknowledge/context layerである
 - 人間向けHTMLやCMS画面ではなく、AIが参照する正本を扱う
@@ -88,18 +88,18 @@ AgentPressのMVPでは、このうちmutating publish/update系はそのまま�
 ## Differences
 
 ContextNestは、verifiable context vaultの仕様に重心がある。  
-AgentPressは、既存の社内ナレッジをAI向けverified contextへ変換し、提案、レビュー、承認、配布を回す実務ワークフローに重心を置く。
+CiteHankoは、既存の社内ナレッジをAI向けverified contextへ変換し、提案、レビュー、承認、配布を回す実務ワークフローに重心を置く。
 
 主な違い:
 
 - ContextNestはfile vault、hash chain、checkpoint、URI、selector grammarが中心
-- AgentPress MVPはSQLite、Markdown import/export、review queue、CLI approvalが中心
+- CiteHanko MVPはSQLite、Markdown import/export、review queue、CLI approvalが中心
 - ContextNestはpublish/update系MCP toolを持つ
-- AgentPress MVPはAIからの正式更新を許さず、proposalまでにする
+- CiteHanko MVPはAIからの正式更新を許さず、proposalまでにする
 - ContextNestは監査・検証可能性を仕様として強く持つ
-- AgentPressはまず現場で使える承認運用、scope、owner、reviewerを優先する
+- CiteHankoはまず現場で使える承認運用、scope、owner、reviewerを優先する
 - ContextNestは仕様互換エコシステム寄り
-- AgentPressはOSS product/frameworkとして導入体験とworkflowを優先する
+- CiteHankoはOSS product/frameworkとして導入体験とworkflowを優先する
 
 ## What to Borrow
 
@@ -123,7 +123,7 @@ AgentPressは、既存の社内ナレッジをAI向けverified contextへ変換�
 - MCPからのpublish/approve/update
 - spec-firstな互換実装の整備
 
-これらは正しいが、AgentPressの初期価値を検証するには重い。  
+これらは正しいが、CiteHankoの初期価値を検証するには重い。<br>
 最初に検証すべきは、AI agentが「社内で承認されたcontextだけを検索し、足りない知識はdraft/proposalに戻す」運用が実際に回るかどうか。
 
 ## Positioning
@@ -132,15 +132,15 @@ AgentPressは、既存の社内ナレッジをAI向けverified contextへ変換�
 
 ```text
 ContextNest is a verifiable context vault specification.
-AgentPress is an approval-first workflow for turning organizational knowledge into verified context for AI agents.
+CiteHanko is an approval-first workflow for turning organizational knowledge into verified context for AI agents.
 ```
 
-AgentPressの主張:
+CiteHankoの主張:
 
 - Notion/Confluenceは人間が読むためのknowledge base
 - RAG/vector DBは関連文書を探すためのretrieval layer
 - ContextNestは検証可能なcontext vault spec
-- AgentPressはAI agentに配る社内ナレッジを、proposal/review/approveで整備するOSS workflow
+- CiteHankoはAI agentに配る社内ナレッジを、proposal/review/approveで整備するOSS workflow
 
 ## MVP Implications
 

@@ -1,16 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { createNoteService } from "../src/core/notes.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { CiteHankoError } from "../src/core/errors.js";
 import { makeTestContext, insertNoteFixture } from "./helpers.js";
 
 const goodBody = "# 概要\n本文です。\n\n# 正本回答\nこれが正本回答です。";
 const goodSummary = "これは十分な長さのある要約文です。二十文字を超えています。";
 
-function captureError(fn: () => unknown): AgentPressError {
+function captureError(fn: () => unknown): CiteHankoError {
   try {
     fn();
   } catch (err) {
-    return err as AgentPressError;
+    return err as CiteHankoError;
   }
   throw new Error("expected function to throw");
 }
@@ -68,7 +68,7 @@ describe("createDraft", () => {
     const notes = createNoteService(ctx);
 
     const err = captureError(() => notes.createDraft(baseDraftInput({ source: [], reason: null })));
-    expect(err).toBeInstanceOf(AgentPressError);
+    expect(err).toBeInstanceOf(CiteHankoError);
     expect(err.code).toBe("invalid_input");
   });
 
@@ -77,7 +77,7 @@ describe("createDraft", () => {
     const notes = createNoteService(ctx);
 
     const err = captureError(() => notes.createDraft(baseDraftInput({ title: "" })));
-    expect(err).toBeInstanceOf(AgentPressError);
+    expect(err).toBeInstanceOf(CiteHankoError);
     expect(err.code).toBe("invalid_input");
   });
 
@@ -168,7 +168,7 @@ describe("updateDraft", () => {
     const notes = createNoteService(ctx);
     insertNoteFixture(ctx, { id: "note_verified1", status: "verified", createdBy: "agent:codex" });
 
-    expect(() => notes.updateDraft({ id: "note_verified1", title: "x" })).toThrow(AgentPressError);
+    expect(() => notes.updateDraft({ id: "note_verified1", title: "x" })).toThrow(CiteHankoError);
   });
 
   it("refuses to edit an archived note", () => {
@@ -215,13 +215,13 @@ describe("getVerifiedNote", () => {
     const notes = createNoteService(ctx);
     insertNoteFixture(ctx, { id: "note_r1", status: "rejected" });
 
-    expect(() => notes.getVerifiedNote("note_r1")).toThrow(AgentPressError);
+    expect(() => notes.getVerifiedNote("note_r1")).toThrow(CiteHankoError);
   });
 
   it("throws not_found for an unknown id", () => {
     const ctx = makeTestContext();
     const notes = createNoteService(ctx);
-    expect(() => notes.getVerifiedNote("note_missing")).toThrow(AgentPressError);
+    expect(() => notes.getVerifiedNote("note_missing")).toThrow(CiteHankoError);
   });
 });
 
@@ -260,7 +260,7 @@ describe("archiveNote", () => {
     const notes = createNoteService(ctx);
     insertNoteFixture(ctx, { id: "note_d2", status: "draft" });
 
-    expect(() => notes.archiveNote("note_d2", "not verified yet")).toThrow(AgentPressError);
+    expect(() => notes.archiveNote("note_d2", "not verified yet")).toThrow(CiteHankoError);
   });
 });
 

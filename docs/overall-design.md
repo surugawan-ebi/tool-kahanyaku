@@ -1,14 +1,14 @@
 ---
-title: AgentPress 全体設計
+title: CiteHanko 全体設計
 updated: 2026-07-10
-summary: AgentPressをOSSのVerified Context Layerとして実装するための全体アーキテクチャ、データモデル、ワークフロー設計
+summary: CiteHankoをOSSのVerified Context Layerとして実装するための全体アーキテクチャ、データモデル、ワークフロー設計
 ---
 
-# AgentPress 全体設計
+# CiteHanko 全体設計
 
 ## Design Goal
 
-AgentPressは、AI agentに配る社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー。  
+CiteHankoは、AI agentに配る社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー。<br>
 人間向けドキュメントの置き換えではなく、既存のNotion、Confluence、Google Docs、Slack、GitHub Wiki、OpenWiki生成docsなどから「AIが使ってよいverified context」を切り出して配る層にする。
 
 最初の実装はlocal-firstなOSS coreに絞る。
@@ -25,7 +25,7 @@ SaaS、ログイン、課金、Web UI、connector、ベクトル検索はMVPで�
 
 ## Product Boundary
 
-AgentPressがやること:
+CiteHankoがやること:
 
 - AI agentが検索、取得、引用できるverified knowledge registryを提供する
 - AI agentが新規知識をdraftとして提案できる
@@ -34,7 +34,7 @@ AgentPressがやること:
 - すべての変更にhistory eventを残す
 - Markdownでimport/exportできる
 
-AgentPressがMVPでやらないこと:
+CiteHankoがMVPでやらないこと:
 
 - codebaseを解析してdocsを自動生成する
 - 社内wikiやSlackから自動同期する
@@ -44,7 +44,7 @@ AgentPressがMVPでやらないこと:
 - cryptographic hash chainやgraph checkpointを持つ
 
 OpenWikiはcodebase docs生成、ContextNestはverifiable context vault仕様。  
-AgentPressは、生成済みdocsや既存ナレッジをreviewer-approved contextへ変換するworkflowに寄せる。
+CiteHankoは、生成済みdocsや既存ナレッジをreviewer-approved contextへ変換するworkflowに寄せる。
 
 ## Actors
 
@@ -69,7 +69,7 @@ AI Client
   |
   | MCP
   v
-AgentPress MCP Server
+CiteHanko MCP Server
   |
   v
 Core Services
@@ -87,7 +87,7 @@ Human Reviewer
   |
   | CLI
   v
-AgentPress CLI
+CiteHanko CLI
   |
   v
 Core Services
@@ -109,7 +109,7 @@ MVPではstdio MCP serverで十分。
 - contribution plane（提案系）: `create_note_draft` / `update_draft` / `propose_note_update` / `recommend_archive`
 - review plane（レビュー状況・履歴の把握。正式根拠には使わない）: `list_review_items` / `get_review_item` / `get_note_history`
 
-合計11 tools。`get_context_pack`はconfig定義済みのverified note集合を一括取得するtoolで、個々のnoteのverified/archived境界はsearch_notesと同じ扱いのためverified planeに置く。`recommend_archive`は内容変更を伴わない提案（proposal_type: archive_recommendation）としてcontribution planeに置く。`get_note_history`はsnapshotを含まない軽量な監査用履歴で、詳細が必要な場合はCLIの`agentpress history <id>`を使う。
+合計11 tools。`get_context_pack`はconfig定義済みのverified note集合を一括取得するtoolで、個々のnoteのverified/archived境界はsearch_notesと同じ扱いのためverified planeに置く。`recommend_archive`は内容変更を伴わない提案（proposal_type: archive_recommendation）としてcontribution planeに置く。`get_note_history`はsnapshotを含まない軽量な監査用履歴で、詳細が必要な場合はCLIの`citehanko history <id>`を使う。
 
 公開しないtools:
 
@@ -130,19 +130,19 @@ MVPではWeb UIを作らないので、レビュー体験はCLIで成立させ�
 必要コマンド:
 
 ```bash
-agentpress init
-agentpress mcp
-agentpress list
-agentpress list --pending
-agentpress search "keyword"
-agentpress show <id>
-agentpress approve <id>
-agentpress reject <id>
-agentpress archive <id>
-agentpress history <id>
-agentpress export
-agentpress import
-agentpress audit
+citehanko init
+citehanko mcp
+citehanko list
+citehanko list --pending
+citehanko search "keyword"
+citehanko show <id>
+citehanko approve <id>
+citehanko reject <id>
+citehanko archive <id>
+citehanko history <id>
+citehanko export
+citehanko import
+citehanko audit
 ```
 
 `approve`、`reject`、`archive`、`audit`はCLI限定。  
@@ -175,7 +175,7 @@ agentpress audit
 
 `ContextPackService`
 
-- `agentpress.config.yaml`の`context_packs`定義をselector（scopes OR / tags AND / note_ids pin）で解決し、対象noteの一覧を返す
+- `citehanko.config.yaml`の`context_packs`定義をselector（scopes OR / tags AND / note_ids pin）で解決し、対象noteの一覧を返す
 - archived/非verified/stale(strict時)の除外とその理由付け
 - `get_context_pack`用のページング(limit/cursor)とbody切り詰め、`get_registry_overview`用の件数集計を担う
 
@@ -192,7 +192,7 @@ agentpress audit
 
 - note/proposal/import/exportのevent記録（承認・却下・archive系イベントには`config_hash`、maintainer bypass時は`scope_reviewer_bypass: true`もmetadataに記録）
 - review時のsnapshot保存
-- `agentpress audit`向けの横断クエリ（from/to/scope/actor/entity_idでのフィルタ）
+- `citehanko audit`向けの横断クエリ（from/to/scope/actor/entity_idでのフィルタ）
 
 `MarkdownImportExportService`
 
@@ -207,16 +207,16 @@ MVPの正本はSQLite。
 Markdownはimport/export、seed投入、人間が読むsnapshotとして扱い、dual masterにしない。
 
 ```text
-.agentpress/agentpress.sqlite  -> canonical runtime state
+.citehanko/citehanko.sqlite  -> canonical runtime state
 data/notes/*.md                -> exported snapshot
 ```
 
 運用ルール:
 
-- サーバ稼働中の正本は`.agentpress/agentpress.sqlite`。`--data-dir`または`AGENTPRESS_HOME`で変更できる
+- サーバ稼働中の正本は`.citehanko/citehanko.sqlite`。`--data-dir`または`CITEHANKO_HOME`で変更できる
 - SQLiteはWALモードを前提にする。`busy_timeout`、`foreign_keys=ON`を設定し、書き込みは必ずトランザクションにする
-- exportはMarkdownを上書きしてよい。ファイル名は`<slug>--<note_id>.md`とする。`data/notes/*.md`は生成物のため`.gitignore`推奨。追跡する場合はexport結果がAgentPress側でレビュー済みである前提を明記する
-- Markdown直接編集は`agentpress import`で取り込む
+- exportはMarkdownを上書きしてよい。ファイル名は`<slug>--<note_id>.md`とする。`data/notes/*.md`は生成物のため`.gitignore`推奨。追跡する場合はexport結果がCiteHanko側でレビュー済みである前提を明記する
+- Markdown直接編集は`citehanko import`で取り込む
 - importで既存verified noteに差分がある場合は直接上書きせずproposalを作る
 - importで対象がrejectedの場合はエラーにする。再提出は`update_draft`でのみ行う
 - 新規Markdown importは原則draft
@@ -391,7 +391,7 @@ context_packs:
     note_ids: []
 ```
 
-初期は`agentpress.config.yaml`を想定する。  
+初期は`citehanko.config.yaml`を想定する。<br>
 設定がなくても単独利用できるdefaultを持つ。
 
 `PolicyService`は、create/import/approve時に`policy_warnings[]`として不備を通知する。MVPで扱うcodeは以下。
@@ -470,7 +470,7 @@ actorはtool入力では受け取らず、サーバ起動時の設定で固定�
 ```
 
 マッチ根拠は主に`matched_fields`と`snippet`で示す。`score`はFTS5でマッチした結果にのみ付く補助情報（`-bm25()`、大きいほど良い）で、LIKEでマッチした結果は`score: null`になる。queryローカルな相対値であり、他のqueryとの比較や信頼度の指標としては使わない。  
-citationには`version`、`review_due_at`、`stale`を必ず含める。根拠のバージョン追跡は`note_id + version + updated_at`だけで完結できるようにする（詳細な変更履歴は`get_note_history`または`agentpress history`）。stale noteは正式根拠として使ってよいが、AIは回答時に「要再確認」であることを明示する。
+citationには`version`、`review_due_at`、`stale`を必ず含める。根拠のバージョン追跡は`note_id + version + updated_at`だけで完結できるようにする（詳細な変更履歴は`get_note_history`または`citehanko history`）。stale noteは正式根拠として使ってよいが、AIは回答時に「要再確認」であることを明示する。
 
 ### get_note [verified plane]
 
@@ -506,7 +506,7 @@ MVPではsection citationはやらない。`verified`と`archived`のみ返し�
 
 ### get_context_pack [verified plane]
 
-`agentpress.config.yaml`の`context_packs.<name>`で定義された、verified noteの厳選済みセットを一括取得する。selectorの意味論は`(scopes OR AND tags全部含む) ∪ note_ids`（Data Model節の`context_packs`は無いが、config定義の詳細はPolicy Model節・detailed-design.mdを参照）。
+`citehanko.config.yaml`の`context_packs.<name>`で定義された、verified noteの厳選済みセットを一括取得する。selectorの意味論は`(scopes OR AND tags全部含む) ∪ note_ids`（Data Model節の`context_packs`は無いが、config定義の詳細はPolicy Model節・detailed-design.mdを参照）。
 
 入力: `{name, include_body?, limit?, cursor?}`。`include_body`省略時false、`limit`省略時はfalseで50件・trueで20件。  
 出力: `{name, description, notes[], excluded[], truncated, next_cursor, warnings[]}`。
@@ -591,7 +591,7 @@ MCPにも出すが、これはAIが「人間にレビューを促す」ためで
 `note_`または`proposal_`のIDについて、監査・文脈把握用の変更履歴を返す。正式根拠としては使わない。
 
 入力: `{id, limit?}`（`limit`省略時は20件）。出力: `{id, events: [{event_type, actor, role, scope, reason, created_at}]}`。  
-直近のイベントから`limit`件を新しい順に返す。before/afterのsnapshotはサイズが大きいため意図的に含めない。差分やsnapshotの詳細が必要な場合はCLIの`agentpress history <id>`を案内する。  
+直近のイベントから`limit`件を新しい順に返す。before/afterのsnapshotはサイズが大きいため意図的に含めない。差分やsnapshotの詳細が必要な場合はCLIの`citehanko history <id>`を案内する。<br>
 「誰が・いつ・なぜ」を把握するための監査ツールであり、noteの現在の正式な内容が必要な場合は`get_note`を使う。
 
 ## CLI Workflow
@@ -599,26 +599,26 @@ MCPにも出すが、これはAIが「人間にレビューを促す」ためで
 ### init
 
 ```bash
-agentpress init
+citehanko init
 ```
 
 作るもの:
 
 ```text
-.agentpress/
-  agentpress.sqlite
-  agentpress.config.yaml
+.citehanko/
+  citehanko.sqlite
+  citehanko.config.yaml
 data/
   notes/
 ```
 
-OSS repoとして実装する場合、デフォルトではカレントディレクトリ配下に`.agentpress/`を作る。  
+OSS repoとして実装する場合、デフォルトではカレントディレクトリ配下に`.citehanko/`を作る。<br>
 `--data-dir`で変更できるようにする。
 
 ### mcp
 
 ```bash
-agentpress mcp
+citehanko mcp
 ```
 
 MCP serverを起動する。  
@@ -627,13 +627,13 @@ MVPではstdio transportのみ。debug用HTTPはMVP外にし、将来入れる�
 ### review
 
 ```bash
-agentpress list --pending
-agentpress show proposal_xxxxx
-agentpress approve proposal_xxxxx --actor cs-lead --reason "FAQとして確認済み"
-agentpress reject proposal_xxxxx --actor cs-lead --reason "source不足"
+citehanko list --pending
+citehanko show proposal_xxxxx
+citehanko approve proposal_xxxxx --actor cs-lead --reason "FAQとして確認済み"
+citehanko reject proposal_xxxxx --actor cs-lead --reason "source不足"
 ```
 
-`agentpress list --pending`はレビュー負債対策の中心コマンドにする。scope/kind別件数サマリ、作成日時の古い順ソート、`policy_warnings`有無・`possible_duplicates`有無のフラグ表示を持たせる。
+`citehanko list --pending`はレビュー負債対策の中心コマンドにする。scope/kind別件数サマリ、作成日時の古い順ソート、`policy_warnings`有無・`possible_duplicates`有無のフラグ表示を持たせる。
 
 `approve`時の処理:
 
@@ -649,8 +649,8 @@ agentpress reject proposal_xxxxx --actor cs-lead --reason "source不足"
 ### audit
 
 ```bash
-agentpress audit --scope support --format csv --out support-audit.csv
-agentpress audit --entity note_xxxxx --with-snapshots
+citehanko audit --scope support --format csv --out support-audit.csv
+citehanko audit --entity note_xxxxx --with-snapshots
 ```
 
 `history_events`をfrom/to/scope/actor/entityでフィルタし、jsonl（デフォルト、`--with-snapshots`でbefore/after snapshotを含められる）またはcsv（flatten、snapshot無し、ヘッダ行付き）でexportする。`--out`未指定時はstdoutに出す。`--format csv`と`--with-snapshots`の組み合わせは`invalid_input`エラーにする。MCP toolとしては公開せず、監査は人間のCLI操作に限定する。
@@ -664,8 +664,8 @@ AI agent
   -> create_note_draft
   -> draft note
 Human reviewer
-  -> agentpress show <note_id>
-  -> agentpress approve <note_id>
+  -> citehanko show <note_id>
+  -> citehanko approve <note_id>
   -> verified note
 AI agent
   -> search_notes
@@ -689,13 +689,13 @@ Human reviewer
 
 ```text
 Human reviewer
-  -> agentpress reject note_xxxxx --reason "source不足"
+  -> citehanko reject note_xxxxx --reason "source不足"
   -> note status: rejected
 AI agent
   -> update_draft(note_xxxxx)
   -> note status: draft (note_resubmittedイベント)
 Human reviewer
-  -> agentpress approve note_xxxxx
+  -> citehanko approve note_xxxxx
 ```
 
 ### Recover from needs_rebase
@@ -704,7 +704,7 @@ Human reviewer
 AI agent
   -> propose_note_update(proposal_A)
 Human reviewer
-  -> agentpress approve proposal_A
+  -> citehanko approve proposal_A
   -> note version: 3 -> 4
 proposal_B (base_note_version: 3, 同一note宛)
   -> status: needs_rebase
@@ -719,7 +719,7 @@ AI agent
 
 ```text
 Human maintainer
-  -> agentpress import ./docs
+  -> citehanko import ./docs
   -> new docs become draft notes
   -> changed verified docs become proposals
 Human reviewer
@@ -733,7 +733,7 @@ openwiki/
   architecture.md
   testing.md
 
-agentpress import openwiki/ --source openwiki --commit <sha>
+citehanko import openwiki/ --source openwiki --commit <sha>
 ```
 
 MVPでは専用parser不要。Markdown importで受け、source metadataに`openwiki`を入れるだけでよい。
@@ -747,14 +747,14 @@ AI agent
   -> recommend_archive(note_id, reason: "内容が古いため非推奨化を提案")
   -> pending proposal (proposal_type: "archive_recommendation")
 Human reviewer
-  -> agentpress show proposal_xxxxx（[ARCHIVE RECOMMENDATION]とreasonが表示される）
-  -> agentpress approve proposal_xxxxx（対象noteがarchivedになる）
+  -> citehanko show proposal_xxxxx（[ARCHIVE RECOMMENDATION]とreasonが表示される）
+  -> citehanko approve proposal_xxxxx（対象noteがarchivedになる）
 ```
 
 archiveの実行自体（proposalのapprove）は人間がCLIで判断して行う。archive後は通常検索に出ない。  
 `get_note`は明示IDなら返してもよいが、`archived`を強く表示する。
 
-`agentpress archive <note_id>`による直接archiveも引き続き利用できる（人間が能動的にarchiveする経路）。内容そのものを直したい場合は、archiveではなく`propose_note_update`で本文修正を提案する。
+`citehanko archive <note_id>`による直接archiveも引き続き利用できる（人間が能動的にarchiveする経路）。内容そのものを直したい場合は、archiveではなく`propose_note_update`で本文修正を提案する。
 
 ## Import/Export Rules
 
@@ -794,7 +794,7 @@ source:
 
 同一性判定はfrontmatterの`id`を優先する。これによりMarkdown編集を許しつつ、verified noteの直接上書きを防ぐ。
 
-「PRレビュー = コード、AgentPressレビュー = ナレッジ」という責務分離を運用ルールとする。`data/notes/*.md`のコード上の変更（ファイル構成やCI設定など）はGit/PRでレビューし、ノート内容の正式化はAgentPressのdraft/proposalレビューで行う。
+「PRレビュー = コード、CiteHankoレビュー = ナレッジ」という責務分離を運用ルールとする。`data/notes/*.md`のコード上の変更（ファイル構成やCI設定など）はGit/PRでレビューし、ノート内容の正式化はCiteHankoのdraft/proposalレビューで行う。
 
 ## Search Design
 
@@ -847,7 +847,7 @@ function createSearchEngine(ctx: AppContext): SearchEngine; // search_engine設�
 
 ## Citation Design
 
-MVPはnote単位citation。`version`、`review_due_at`、`stale`は必須フィールドとする。根拠のバージョン追跡は`note_id + version + updated_at`だけで完結できるようにする。詳細な変更履歴が必要な場合は`get_note_history`（監査用の軽量版）またはCLIの`agentpress history`を使う。
+MVPはnote単位citation。`version`、`review_due_at`、`stale`は必須フィールドとする。根拠のバージョン追跡は`note_id + version + updated_at`だけで完結できるようにする。詳細な変更履歴が必要な場合は`get_note_history`（監査用の軽量版）またはCLIの`citehanko history`を使う。
 
 ```json
 {
@@ -895,6 +895,8 @@ Human-only:
 - export
 - policy change
 
+ここでの`Human-only`はagent-facing MCPに公開しない操作面を示す。認証・OS権限による強制境界ではなく、同じOS userとしてshellとCLIへアクセスできるagentはこれらの操作を実行できる。信頼できないagentを扱う場合は、OS account、filesystem permission、container/sandbox、CLI executableへのaccessを別途分離する。
+
 ### Prompt Injection Boundary
 
 note本文はdataでありinstructionではない。  
@@ -923,7 +925,7 @@ Warning: created_by and reviewed_by are the same actor.
 
 ### Scope Reviewer Enforcement
 
-`scope_reviewers`設定（デフォルト`warn`）で、承認者が対象noteのscopeの`reviewers[]`に登録されているかを制御する。`enforce`にすると、登録されていない承認者（scopeが未設定、そのscopeにreviewerが1人も登録されていない場合も同様）は`policy_violation`で拒否される。ただし`maintainer` roleはbreak-glassとして承認できる。break-glassで承認が成立した場合、その承認のhistory eventの`metadata`に`scope_reviewer_bypass: true`を記録し、後から`agentpress audit`で「誰がbypassして承認したか」を追跡できるようにする。この認可チェックは`approve`にのみ適用され、`agentpress archive`（人間による直接archive）は対象外。
+`scope_reviewers`設定（デフォルト`warn`）で、承認者が対象noteのscopeの`reviewers[]`に登録されているかを制御する。`enforce`にすると、登録されていない承認者（scopeが未設定、そのscopeにreviewerが1人も登録されていない場合も同様）は`policy_violation`で拒否される。ただし`maintainer` roleはbreak-glassとして承認できる。break-glassで承認が成立した場合、その承認のhistory eventの`metadata`に`scope_reviewer_bypass: true`を記録し、後から`citehanko audit`で「誰がbypassして承認したか」を追跡できるようにする。この認可チェックは`approve`にのみ適用され、`citehanko archive`（人間による直接archive）は対象外。
 
 ### Actor Determination
 
@@ -937,7 +939,7 @@ mutating tool（`create_note_draft` / `update_draft` / `propose_note_update` / `
 
 ### Audit Traceability
 
-承認/却下/archive系のhistory eventの`metadata`には、決定時点の実効config全体をハッシュ化した`config_hash`（SHA-256、key順序に依存しない正規化JSON）を記録する。config自体の変更履歴までは追わないが、「このconfig_hashの承認は、後から見つかった別のconfig_hashの承認と同じpolicy下で行われたか」を`agentpress audit`のexport結果から突き合わせられる。
+承認/却下/archive系のhistory eventの`metadata`には、決定時点の実効config全体をハッシュ化した`config_hash`（SHA-256、key順序に依存しない正規化JSON）を記録する。config自体の変更履歴までは追わないが、「このconfig_hashの承認は、後から見つかった別のconfig_hashの承認と同じpolicy下で行われたか」を`citehanko audit`のexport結果から突き合わせられる。
 
 ### Concurrency and Optimistic Lock
 
@@ -949,7 +951,7 @@ SQLiteはWALモードを前提にし、`busy_timeout`と`foreign_keys=ON`を設�
 実装repoの想定。
 
 ```text
-agentpress/
+tool-citehanko/
   README.md
   LICENSE
   package.json
@@ -1025,14 +1027,14 @@ agentpress/
 
 ## MVP Completion Criteria
 
-- `agentpress init`で`.agentpress/agentpress.sqlite`とconfigを作れる
+- `citehanko init`で`.citehanko/citehanko.sqlite`とconfigを作れる
 - Markdown importでdraft noteを作れる
 - CLIでpending list、show、approve、reject、archiveできる
 - approved noteだけが通常検索に出る
 - MCPからregistry overview、search、read、context pack取得、create draft/update draft、propose update、archive推薦、review status確認、履歴取得が使える（11 tools）
 - verified noteへの直接上書き経路がない
 - history eventにactor、role、scope、reasonが残る。承認/却下/archive系eventには`config_hash`も残る
-- `agentpress audit`でhistory eventをjsonl/csv exportできる
+- `citehanko audit`でhistory eventをjsonl/csv exportできる
 - `scope_reviewers`/`reviewer_separation`をenforceに切り替えると、対象外の承認が拒否される
 - exportでfrontmatterつきMarkdownを出せる
 - example vaultが同梱され、検索が当たるデモができる
@@ -1041,10 +1043,10 @@ agentpress/
 ## Resolved Questions（2026-07-10 決定）
 
 - OSS license: **Apache-2.0**にする。企業導入のしやすさと特許grantを優先し、MITではなくApache-2.0を選ぶ
-- config形式: **YAML**（`agentpress.config.yaml`）にする。zodで厳格にvalidateする
+- config形式: **YAML**（`citehanko.config.yaml`）にする。zodで厳格にvalidateする
 - ID方式: **prefix + ULID**にする（`note_01...`、`proposal_01...`、`hist_01...`）。型が分かり、時系列ソートもできる
 - diff形式: **unified diff文字列**で十分とする。proposed fieldsとnote snapshotが正本で、diffはそこから生成する派生データ。レスポンスには`changed_fields`も含める
-- `agentpress dev`は**`agentpress mcp`**にリネームする。MVPはstdioのみとし、debug用HTTPはMVP外にする。将来入れる場合もopt-inかつlocalhost限定にする
+- `citehanko dev`は**`citehanko mcp`**にリネームする。MVPはstdioのみとし、debug用HTTPはMVP外にする。将来入れる場合もopt-inかつlocalhost限定にする
 - MCP toolで`list_pending_reviews`をAIに出す必要があるかは、**`list_review_items`への置き換え**で決着した
 - `review_due_at`切れの扱い: MVPでは検索結果の`stale: true`フラグのみとし、strict除外はconfigの`strict_stale_filter`（default false）として残す
 
@@ -1060,6 +1062,6 @@ agentpress/
 - context packのselector意味論は`(scopes OR AND tags全部含む) ∪ note_ids`に固定する。archivedはpinされていても絶対に配布しない
 - `get_context_pack`はデフォルトで本文を返さない（メタデータのみ）。`include_body: true`時は`max_body_chars`でハードキャップし、超過分は`body_truncated: true`で切り詰める
 - `scope_reviewers`/`reviewer_separation`のenforceモードで、maintainer roleのみがscope_reviewersをbreak-glassでbypassできる（reviewer_separationはbypass不可）。bypassはhistory metadataに記録する
-- 監査exportは人間のCLI操作（`agentpress audit`）に限定し、MCP toolとしては公開しない
+- 監査exportは人間のCLI操作（`citehanko audit`）に限定し、MCP toolとしては公開しない
 - 承認/却下/archive系のhistory eventに`config_hash`を記録し、どのpolicy下での決定だったかを事後に追跡可能にする
 - source種別ごとの厳格な承認条件は今回も見送り、Phase 2へ持ち越す

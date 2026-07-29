@@ -1,5 +1,5 @@
 ---
-title: AgentPress / Verified Context Layer for AI Agents
+title: CiteHanko / Verified Context Layer for AI Agents
 status: spec
 updated: 2026-07-10
 canonical: neta
@@ -13,21 +13,23 @@ tags:
 summary: AIエージェント向け社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー
 ---
 
-# AgentPress / Verified Context Layer for AI Agents
+# CiteHanko / Verified Context Layer for AI Agents
 
 ## One Line
 
-A Git-style review queue for the knowledge your AI agents are allowed to cite.
+A human approval stamp for the knowledge your AI may cite.
+
+製品カテゴリとしては、AI向けナレッジのGit-style review queue。
 
 AIエージェント向け社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー。  
-NotionやConfluenceが人間向けのknowledge baseなら、AgentPressはAI agentが使ってよいverified contextを配る層。
+NotionやConfluenceが人間向けのknowledge baseなら、CiteHankoはAI agentが使ってよいverified contextを配る層。
 
 ## Why now
 
 AIエージェントが業務や開発で使われるほど、AIが参照する知識の置き場が重要になる。  
 Markdown、Google Docs、Slack、Notion、GitHubに散った知識をそのまま使うと、古さ、出典、信頼度、更新履歴、引用可能性が曖昧になる。
 
-HTMLページを人間が読む前提のCMSや、関連文書を探すだけのRAGでは、AIが安全に扱う正本としては足りない。  
+HTMLページを人間が読む前提のCMSや、関連文書を探すだけのRAGでは、AIが正式根拠として扱える正本としては足りない。<br>
 AIが検索し、引用し、足りない知識をdraft/proposalとして戻し、人間のreviewerが承認するためのverified context layerが必要になる。
 
 ## Problem
@@ -105,14 +107,14 @@ MVPで検証すること:
 ## Positioning
 
 初期構想の`WordPress for AI Agents`は、一言で説明するための入口の比喩にすぎない。  
-今の中心は「AIが使う知識をCMS的に公開する」ことではなく、「既存の社内ナレッジからAIが使ってよいverified contextを作り、承認と履歴つきで配る」こと。英語で一言にするなら`A Git-style review queue for the knowledge your AI agents are allowed to cite`。
+今の中心は「AIが使う知識をCMS的に公開する」ことではなく、「既存の社内ナレッジからAIが使ってよいverified contextを作り、承認と履歴つきで配る」こと。英語で一言にするなら`A human approval stamp for the knowledge your AI may cite`。製品カテゴリは、AI向けナレッジのGit-style review queue。
 
 近い概念:
 
 - Headless CMS: content APIはあるが、AI向け承認、citation、proposal workflowが中心ではない
 - RAG/vector DB: 関連文書を探せるが、承認済みか、現行か、誰が責任を持つかは別問題
-- ContextNest: verifiable context vaultの仕様と参照実装。AgentPressは実務のproposal/review/approve workflowへ寄せる
-- OpenWiki: codebaseからagent-readable docsを生成、更新するCLI。AgentPressは生成されたdocsも含め、AIが使ってよいverified contextとして承認、配布する層
+- ContextNest: verifiable context vaultの仕様と参照実装。CiteHankoは実務のproposal/review/approve workflowへ寄せる
+- OpenWiki: codebaseからagent-readable docsを生成、更新するCLI。CiteHankoは生成されたdocsも含め、AIが使ってよいverified contextとして承認、配布する層
 
 ## Documents
 

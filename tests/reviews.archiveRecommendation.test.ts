@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { createReviewService } from "../src/core/reviews.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { CiteHankoError } from "../src/core/errors.js";
 import { makeTestContext, insertNoteFixture } from "./helpers.js";
 import type { AppContext } from "../src/core/context.js";
 
-function captureError(fn: () => unknown): AgentPressError {
+function captureError(fn: () => unknown): CiteHankoError {
   try {
     fn();
   } catch (err) {
-    return err as AgentPressError;
+    return err as CiteHankoError;
   }
   throw new Error("expected function to throw");
 }
@@ -81,7 +81,7 @@ describe("createArchiveRecommendation", () => {
     insertNoteFixture(ctx, { id: "note_arreq1", status: "verified", version: 1 });
     const reviews = createReviewService(ctx);
 
-    expect(() => reviews.createArchiveRecommendation({ note_id: "note_arreq1", reason: "" })).toThrow(AgentPressError);
+    expect(() => reviews.createArchiveRecommendation({ note_id: "note_arreq1", reason: "" })).toThrow(CiteHankoError);
   });
 });
 
@@ -159,7 +159,7 @@ describe("approve - archive_recommendation", () => {
     const reviews = createReviewService(ctx);
     const { proposal } = reviews.createArchiveRecommendation({ note_id: "note_aa5", reason: "obsolete" });
 
-    // Note gets archived out-of-band (e.g. via `agentpress archive` on the CLI) before this
+    // Note gets archived out-of-band (e.g. via `citehanko archive` on the CLI) before this
     // recommendation is reviewed.
     ctx.db.prepare("UPDATE notes SET status = 'archived', archived_at = ? WHERE id = ?").run(new Date().toISOString(), "note_aa5");
 
@@ -174,7 +174,7 @@ describe("approve - archive_recommendation", () => {
     const { proposal } = reviews.createArchiveRecommendation({ note_id: "note_aa6", reason: "obsolete" });
     reviews.approve(proposal.id);
 
-    expect(() => reviews.approve(proposal.id)).toThrow(AgentPressError);
+    expect(() => reviews.approve(proposal.id)).toThrow(CiteHankoError);
   });
 });
 

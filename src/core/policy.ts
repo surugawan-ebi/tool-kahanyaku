@@ -1,6 +1,6 @@
 import type { AppContext } from "./context.js";
-import type { AgentPressConfig } from "../config/config.js";
-import { AgentPressError } from "./errors.js";
+import type { CiteHankoConfig } from "../config/config.js";
+import { CiteHankoError } from "./errors.js";
 import type { Confidence } from "../types/common.js";
 import type { PolicyWarning } from "../types/policy.js";
 
@@ -63,7 +63,7 @@ export interface PolicyService {
  *  configured for that scope, or reviewers configured but actor isn't one of them. Shared
  *  by checkApprove's not_scope_reviewer warning and assertApprovalAuthorized's enforcement
  *  so the two conditions can never drift apart. */
-function violatesScopeReviewer(scope: string | null, actor: string, config: AgentPressConfig): boolean {
+function violatesScopeReviewer(scope: string | null, actor: string, config: CiteHankoConfig): boolean {
   const reviewers = scope ? (config.scopes[scope]?.reviewers ?? []) : [];
   return reviewers.length === 0 || !reviewers.includes(actor);
 }
@@ -189,7 +189,7 @@ export function createPolicyService(ctx: AppContext): PolicyService {
 
     assertApprovalAuthorized(input: { authorActor: string; scope: string | null }): AuthorizationResult {
       if (config.reviewer_separation === "enforce" && input.authorActor === ctx.actor) {
-        throw new AgentPressError(
+        throw new CiteHankoError(
           "policy_violation",
           `${ctx.actor} is both the author and the approver; reviewer_separation is set to "enforce"`,
           {
@@ -211,7 +211,7 @@ export function createPolicyService(ctx: AppContext): PolicyService {
         return { scopeReviewerBypass: true };
       }
 
-      throw new AgentPressError(
+      throw new CiteHankoError(
         "policy_violation",
         `${ctx.actor} is not a configured reviewer for scope ${input.scope ?? "(none)"}; scope_reviewers is set to "enforce"`,
         {

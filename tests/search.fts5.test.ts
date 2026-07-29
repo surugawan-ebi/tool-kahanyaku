@@ -6,7 +6,7 @@ import {
   hasFts5TrigramSupport,
 } from "../src/core/search.js";
 import { buildSearchText } from "../src/core/searchText.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { CiteHankoError } from "../src/core/errors.js";
 import { makeTestContext } from "./helpers.js";
 import type { AppContext } from "../src/core/context.js";
 
@@ -227,20 +227,20 @@ describe("createSearchEngine factory", () => {
     expect(typeof result.results[0].score).toBe("number");
   });
 
-  it('mode "fts5" (explicit) throws a clear AgentPressError instead of silently falling back when unsupported', () => {
+  it('mode "fts5" (explicit) throws a clear CiteHankoError instead of silently falling back when unsupported', () => {
     const ctx = makeTestContext({ config: { search_engine: "fts5" } });
     // Simulate an environment without FTS5 trigram support by dropping the table (and its
     // sync triggers) migration 002 creates best-effort.
     ctx.db.exec("DROP TRIGGER notes_fts_ai; DROP TRIGGER notes_fts_ad; DROP TRIGGER notes_fts_au; DROP TABLE notes_fts;");
     expect(hasFts5TrigramSupport(ctx.db)).toBe(false);
 
-    expect(() => createSearchEngine(ctx)).toThrow(AgentPressError);
+    expect(() => createSearchEngine(ctx)).toThrow(CiteHankoError);
     try {
       createSearchEngine(ctx);
       expect.unreachable();
     } catch (err) {
-      expect(err).toBeInstanceOf(AgentPressError);
-      expect((err as AgentPressError).code).toBe("invalid_input");
+      expect(err).toBeInstanceOf(CiteHankoError);
+      expect((err as CiteHankoError).code).toBe("invalid_input");
     }
   });
 

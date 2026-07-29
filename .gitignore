@@ -1,6 +1,6 @@
 node_modules/
 dist/
-.agentpress/
+.citehanko/
 data/notes/
 *.log
 .DS_Store

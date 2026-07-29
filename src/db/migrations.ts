@@ -1,9 +1,9 @@
-import type { AgentPressDb } from "./client.js";
+import type { CiteHankoDb } from "./client.js";
 
 interface Migration {
   id: number;
   name: string;
-  up(db: AgentPressDb): void;
+  up(db: CiteHankoDb): void;
 }
 
 const MIGRATIONS: Migration[] = [
@@ -132,7 +132,7 @@ const MIGRATIONS: Migration[] = [
       // FTS5 with the trigram tokenizer needs SQLite >= 3.34 built with FTS5 enabled.
       // Both are true for better-sqlite3's default prebuilt binaries (verified against the
       // version this project pins), but a differently-built native module should not be
-      // able to break `agentpress init` entirely just because full-text search isn't
+      // able to break `citehanko init` entirely just because full-text search isn't
       // available -- LIKE-based search still works either way. So this step is best-effort:
       // wrapped in its own nested transaction (a SAVEPOINT, since we're already inside
       // runMigrations' transaction) so a failure partway through cleanly undoes any partial
@@ -175,7 +175,7 @@ const MIGRATIONS: Migration[] = [
 ];
 
 /** Runs pending migrations in id order, each in its own transaction. */
-export function runMigrations(db: AgentPressDb): void {
+export function runMigrations(db: CiteHankoDb): void {
   db.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       id INTEGER PRIMARY KEY,

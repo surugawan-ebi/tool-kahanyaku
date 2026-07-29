@@ -8,7 +8,7 @@ export function registerMcpCommand(program: Command): void {
     .command("mcp")
     .description("Start the MCP stdio server")
     .option("--actor <actor>", "actor identity for this MCP server process")
-    .option("--data-dir <dir>", "data directory (default: ./.agentpress or $AGENTPRESS_HOME)")
+    .option("--data-dir <dir>", "data directory (default: ./.citehanko or $CITEHANKO_HOME)")
     .action(async (opts: { actor?: string; dataDir?: string }) => {
       try {
         const ctx = createContext({ actor: opts.actor, dataDir: opts.dataDir });

@@ -10,12 +10,12 @@ import { handleError } from "../context.js";
 export function registerInitCommand(program: Command): void {
   const cmd = program
     .command("init")
-    .description("Initialize .agentpress/ (SQLite database, config) and data/notes/")
-    .option("--data-dir <dir>", "data directory (default: ./.agentpress or $AGENTPRESS_HOME)")
+    .description("Initialize .citehanko/ (SQLite database, config) and data/notes/")
+    .option("--data-dir <dir>", "data directory (default: ./.citehanko or $CITEHANKO_HOME)")
     .action(async (opts: { dataDir?: string }) => {
       try {
         const dataDir = resolveDataDir(opts.dataDir);
-        const dbPath = path.join(dataDir, "agentpress.sqlite");
+        const dbPath = path.join(dataDir, "citehanko.sqlite");
         const configPath = path.join(dataDir, CONFIG_FILE_NAME);
         const notesDir = path.resolve("data/notes");
 
@@ -35,7 +35,7 @@ export function registerInitCommand(program: Command): void {
         if (dbAlreadyExisted && configAlreadyExisted) {
           console.log(pc.yellow(`Already initialized at ${dataDir} (nothing changed).`));
         } else {
-          console.log(pc.green(`Initialized AgentPress at ${dataDir}`));
+          console.log(pc.green(`Initialized CiteHanko at ${dataDir}`));
         }
         console.log(`  database: ${dbPath}`);
         console.log(`  config:   ${configPath}${configAlreadyExisted ? " (already existed, left untouched)" : ""}`);

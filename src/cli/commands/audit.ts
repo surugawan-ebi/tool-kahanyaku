@@ -2,7 +2,7 @@ import type { Command } from "commander";
 import fs from "node:fs";
 import { createContext, type AppContext } from "../../core/context.js";
 import { createHistoryService } from "../../core/history.js";
-import { AgentPressError } from "../../core/errors.js";
+import { CiteHankoError } from "../../core/errors.js";
 import { handleError } from "../context.js";
 import type { HistoryEvent } from "../../types/history.js";
 
@@ -69,12 +69,12 @@ export function registerAuditCommand(program: Command): void {
       try {
         const format = opts.format ?? "jsonl";
         if (format !== "jsonl" && format !== "csv") {
-          throw new AgentPressError("invalid_input", `invalid --format: ${format}`, {
+          throw new CiteHankoError("invalid_input", `invalid --format: ${format}`, {
             suggested_action: "use --format jsonl or --format csv",
           });
         }
         if (format === "csv" && opts.withSnapshots) {
-          throw new AgentPressError("invalid_input", "--with-snapshots is only supported with --format jsonl", {
+          throw new CiteHankoError("invalid_input", "--with-snapshots is only supported with --format jsonl", {
             suggested_action: "drop --with-snapshots, or use --format jsonl",
           });
         }

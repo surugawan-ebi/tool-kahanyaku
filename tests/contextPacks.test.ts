@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createContextPackService } from "../src/core/contextPacks.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { CiteHankoError } from "../src/core/errors.js";
 import { makeTestContext, insertNoteFixture } from "./helpers.js";
 import type { AppContext } from "../src/core/context.js";
 import type { ContextPackConfig } from "../src/config/config.js";
@@ -208,8 +208,8 @@ describe("get_context_pack errors", () => {
       createContextPackService(ctx).getPack("nope");
       expect.unreachable();
     } catch (err) {
-      expect(err).toBeInstanceOf(AgentPressError);
-      const e = err as AgentPressError;
+      expect(err).toBeInstanceOf(CiteHankoError);
+      const e = err as CiteHankoError;
       expect(e.code).toBe("not_found");
       expect(e.suggested_action).toContain("existing_pack");
     }
@@ -221,7 +221,7 @@ describe("get_context_pack errors", () => {
       createContextPackService(ctx).getPack("anything");
       expect.unreachable();
     } catch (err) {
-      const e = err as AgentPressError;
+      const e = err as CiteHankoError;
       expect(e.code).toBe("not_found");
       expect(e.suggested_action).toContain("context_packs");
     }

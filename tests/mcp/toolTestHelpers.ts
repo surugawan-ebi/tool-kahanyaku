@@ -11,7 +11,7 @@ export function structured<T = Record<string, unknown>>(result: CallToolResult):
 }
 
 /**
- * Unwraps an error ToolResult's AgentPressError-shaped JSON payload, failing the test if it
+ * Unwraps an error ToolResult's CiteHankoError-shaped JSON payload, failing the test if it
  * didn't error. Error results carry the payload only in `content[0].text` (JSON), not
  * `structuredContent` -- see toolResponse.ts's errorResult() for why.
  */

@@ -27,27 +27,27 @@ source:
 30日以内であれば返金可能です。
 `;
 
-describe("agentpress CLI end-to-end flow", () => {
+describe("citehanko CLI end-to-end flow", () => {
   let project: { dir: string; cleanup: () => void };
-  const originalActorEnv = process.env.AGENTPRESS_ACTOR;
+  const originalActorEnv = process.env.CITEHANKO_ACTOR;
 
   beforeEach(() => {
     project = setupTmpProject();
-    process.env.AGENTPRESS_ACTOR = "agent:codex";
+    process.env.CITEHANKO_ACTOR = "agent:codex";
   });
 
   afterEach(() => {
     project.cleanup();
-    if (originalActorEnv === undefined) delete process.env.AGENTPRESS_ACTOR;
-    else process.env.AGENTPRESS_ACTOR = originalActorEnv;
+    if (originalActorEnv === undefined) delete process.env.CITEHANKO_ACTOR;
+    else process.env.CITEHANKO_ACTOR = originalActorEnv;
   });
 
   it("runs init -> import -> list --pending -> approve -> search -> show -> export -> history", async () => {
     // init
     const initResult = await runCli(["init"]);
     expect(initResult.exitCode).toBe(0);
-    expect(fs.existsSync(path.join(project.dir, ".agentpress", "agentpress.sqlite"))).toBe(true);
-    expect(fs.existsSync(path.join(project.dir, ".agentpress", "agentpress.config.yaml"))).toBe(true);
+    expect(fs.existsSync(path.join(project.dir, ".citehanko", "citehanko.sqlite"))).toBe(true);
+    expect(fs.existsSync(path.join(project.dir, ".citehanko", "citehanko.config.yaml"))).toBe(true);
     expect(fs.existsSync(path.join(project.dir, "data", "notes"))).toBe(true);
 
     // init again: safe no-op, still exit 0

@@ -47,7 +47,7 @@ export interface HistoryEventQuery {
 export interface HistoryService {
   record(input: RecordEventInput): HistoryEvent;
   listByEntity(entityId: string): HistoryEvent[];
-  /** Cross-entity query for `agentpress audit`: filters by any combination of
+  /** Cross-entity query for `citehanko audit`: filters by any combination of
    *  from/to/scope/actor/entityId, oldest first (same tie-break as listByEntity). */
   queryEvents(query: HistoryEventQuery): HistoryEvent[];
 }
