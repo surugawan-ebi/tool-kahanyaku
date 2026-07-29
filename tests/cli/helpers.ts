@@ -14,7 +14,7 @@ export interface CliResult {
 
 /**
  * Runs one CLI invocation against a fresh Command tree (buildProgram()), the
- * same way a real `citehanko <args>` process would. Commander-level errors
+ * same way a real `kahanyaku <args>` process would. Commander-level errors
  * (cmd.error(), required-option validation, etc.) are captured via
  * configureOutput(); normal application output goes through console.log, so
  * it's captured by spying on console.log instead (configureOutput only covers
@@ -54,12 +54,12 @@ export async function runCli(args: string[]): Promise<CliResult> {
 
 /**
  * Creates a tmp project directory and chdirs into it, so the CLI's default
- * relative paths (./.citehanko, data/notes) resolve the same way they would
- * for a real user running `citehanko` from a project directory. Call
+ * relative paths (./.kahanyaku, data/notes) resolve the same way they would
+ * for a real user running `kahanyaku` from a project directory. Call
  * cleanup() in an afterEach to restore cwd and remove the tmp dir.
  */
 export function setupTmpProject(): { dir: string; cleanup: () => void } {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "citehanko-cli-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-cli-"));
   const originalCwd = process.cwd();
   process.chdir(dir);
   return {
@@ -80,7 +80,7 @@ export function writeSeedFile(dir: string, name: string, contents: string): stri
 
 /** Reads note ids straight from the SQLite file for test setup/assertions (bypassing the CLI). */
 export function readNoteIds(projectDir: string, opts: { status?: string; orderBy?: "created_at" | "updated_at" } = {}): string[] {
-  const db = openDb(path.join(projectDir, ".citehanko"));
+  const db = openDb(path.join(projectDir, ".kahanyaku"));
   try {
     const orderBy = opts.orderBy ?? "created_at";
     const rows = opts.status
@@ -93,7 +93,7 @@ export function readNoteIds(projectDir: string, opts: { status?: string; orderBy
 }
 
 export function readProposalIds(projectDir: string): string[] {
-  const db = openDb(path.join(projectDir, ".citehanko"));
+  const db = openDb(path.join(projectDir, ".kahanyaku"));
   try {
     const rows = db.prepare("SELECT id FROM update_proposals ORDER BY created_at ASC").all();
     return (rows as { id: string }[]).map((r) => r.id);

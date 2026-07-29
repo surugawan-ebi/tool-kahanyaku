@@ -1,4 +1,4 @@
-import type { CiteHankoDb } from "../db/client.js";
+import type { KahanyakuDb } from "../db/client.js";
 import { newId } from "./ids.js";
 import type { Note } from "../types/note.js";
 import type { Source, Relation, SourceInput } from "../types/common.js";
@@ -104,30 +104,30 @@ export function isStale(note: Pick<Note, "status" | "reviewDueAt">): boolean {
   return note.reviewDueAt < new Date().toISOString();
 }
 
-export function getNoteRow(db: CiteHankoDb, id: string): NoteRow | undefined {
+export function getNoteRow(db: KahanyakuDb, id: string): NoteRow | undefined {
   return db.prepare("SELECT * FROM notes WHERE id = ?").get(id) as NoteRow | undefined;
 }
 
-export function getTags(db: CiteHankoDb, noteId: string): string[] {
+export function getTags(db: KahanyakuDb, noteId: string): string[] {
   const rows = db.prepare("SELECT tag FROM note_tags WHERE note_id = ? ORDER BY tag").all(noteId) as {
     tag: string;
   }[];
   return rows.map((r) => r.tag);
 }
 
-export function getSources(db: CiteHankoDb, noteId: string): Source[] {
+export function getSources(db: KahanyakuDb, noteId: string): Source[] {
   const rows = db.prepare("SELECT * FROM note_sources WHERE note_id = ?").all(noteId) as SourceRow[];
   return rows.map(rowToSource);
 }
 
-export function getRelations(db: CiteHankoDb, noteId: string): Relation[] {
+export function getRelations(db: KahanyakuDb, noteId: string): Relation[] {
   const rows = db
     .prepare("SELECT * FROM note_relations WHERE note_id = ? OR related_note_id = ?")
     .all(noteId, noteId) as RelationRow[];
   return rows.map(rowToRelation);
 }
 
-export function toDetail(db: CiteHankoDb, note: Note): import("../types/note.js").NoteWithDetail {
+export function toDetail(db: KahanyakuDb, note: Note): import("../types/note.js").NoteWithDetail {
   return {
     ...note,
     tags: getTags(db, note.id),
@@ -137,7 +137,7 @@ export function toDetail(db: CiteHankoDb, note: Note): import("../types/note.js"
   };
 }
 
-export function replaceTags(db: CiteHankoDb, noteId: string, tags: string[]): void {
+export function replaceTags(db: KahanyakuDb, noteId: string, tags: string[]): void {
   db.prepare("DELETE FROM note_tags WHERE note_id = ?").run(noteId);
   const insert = db.prepare("INSERT INTO note_tags (note_id, tag) VALUES (?, ?)");
   for (const tag of new Set(tags)) {
@@ -145,7 +145,7 @@ export function replaceTags(db: CiteHankoDb, noteId: string, tags: string[]): vo
   }
 }
 
-export function replaceSources(db: CiteHankoDb, noteId: string, sources: SourceInput[]): void {
+export function replaceSources(db: KahanyakuDb, noteId: string, sources: SourceInput[]): void {
   db.prepare("DELETE FROM note_sources WHERE note_id = ?").run(noteId);
   const insert = db.prepare(
     `INSERT INTO note_sources (id, note_id, type, title, url, path, commit_sha, retrieved_at, metadata_json)
@@ -173,7 +173,7 @@ export function replaceSources(db: CiteHankoDb, noteId: string, sources: SourceI
  * skipped if an existing row already has the same (type, url, path) -- the parts that
  * identify "the same citation" -- to avoid piling up duplicates across re-approvals.
  */
-export function appendSources(db: CiteHankoDb, noteId: string, sources: SourceInput[]): void {
+export function appendSources(db: KahanyakuDb, noteId: string, sources: SourceInput[]): void {
   if (sources.length === 0) return;
   const dedupeKey = (s: { type: string; url?: string | null; path?: string | null }) =>
     `${s.type}|${s.url ?? ""}|${s.path ?? ""}`;
@@ -213,7 +213,7 @@ export interface NoteSnapshot {
  * appendSources) for an "after" snapshot -- tags/sources live in separate tables and
  * are fetched fresh from the DB here, not carried on noteRow itself.
  */
-export function buildNoteSnapshot(db: CiteHankoDb, noteRow: NoteRow): NoteSnapshot {
+export function buildNoteSnapshot(db: KahanyakuDb, noteRow: NoteRow): NoteSnapshot {
   return {
     note: rowToNote(noteRow),
     tags: getTags(db, noteRow.id),
@@ -232,7 +232,7 @@ export function slugify(title: string): string {
 }
 
 /** Auto-suffixes (-2, -3, ...) until the slug is free. Used by both createDraft and markdown import. */
-export function resolveUniqueSlug(db: CiteHankoDb, base: string): { slug: string; adjusted: boolean } {
+export function resolveUniqueSlug(db: KahanyakuDb, base: string): { slug: string; adjusted: boolean } {
   const exists = db.prepare("SELECT 1 FROM notes WHERE slug = ?");
   let candidate = base;
   let suffix = 2;

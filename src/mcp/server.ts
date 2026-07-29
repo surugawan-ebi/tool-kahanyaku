@@ -43,7 +43,7 @@ export function buildMcpServer(ctx: AppContext): McpServer {
   // itself is discarded; searchNotesTool constructs its own per call.
   createSearchEngine(ctx);
 
-  const server = new McpServer({ name: "citehanko", version: readPackageVersion() });
+  const server = new McpServer({ name: "kahanyaku", version: readPackageVersion() });
 
   registerGetRegistryOverviewTool(server, ctx);
   registerSearchNotesTool(server, ctx);
@@ -61,15 +61,15 @@ export function buildMcpServer(ctx: AppContext): McpServer {
 }
 
 /**
- * Entry point used by `citehanko mcp`: builds the server and serves it over stdio.
+ * Entry point used by `kahanyaku mcp`: builds the server and serves it over stdio.
  * stdout is reserved for MCP protocol frames; all logging goes to stderr.
  */
 export async function startMcpServer(ctx: AppContext): Promise<void> {
   const server = buildMcpServer(ctx);
   const transport = new StdioServerTransport();
   process.stderr.write(
-    `[citehanko] starting MCP server (actor=${ctx.actor}, role=${ctx.role}, dataDir=${ctx.dataDir})\n`,
+    `[kahanyaku] starting MCP server (actor=${ctx.actor}, role=${ctx.role}, dataDir=${ctx.dataDir})\n`,
   );
   await server.connect(transport);
-  process.stderr.write("[citehanko] MCP server ready (stdio)\n");
+  process.stderr.write("[kahanyaku] MCP server ready (stdio)\n");
 }

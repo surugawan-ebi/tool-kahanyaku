@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { runCli, setupTmpProject, writeSeedFile, readNoteIds } from "./helpers.js";
 
-describe("citehanko CLI error handling", () => {
+describe("kahanyaku CLI error handling", () => {
   let project: { dir: string; cleanup: () => void };
 
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe("citehanko CLI error handling", () => {
     expect(result.stderr.toLowerCase()).toContain("reason");
   });
 
-  it("approve on an unknown id surfaces the not_found CiteHankoError", async () => {
+  it("approve on an unknown id surfaces the not_found KahanyakuError", async () => {
     await runCli(["init"]);
     const result = await runCli(["approve", "note_doesnotexist", "--reason", "x"]);
     expect(result.exitCode).toBe(1);
@@ -91,10 +91,10 @@ describe("citehanko CLI error handling", () => {
     expect(result.stdout).toContain("No notes found");
   });
 
-  it("init --data-dir places the database at the given directory instead of ./.citehanko", async () => {
+  it("init --data-dir places the database at the given directory instead of ./.kahanyaku", async () => {
     const result = await runCli(["init", "--data-dir", "custom-data"]);
     expect(result.exitCode).toBe(0);
-    expect(fs.existsSync(path.join(project.dir, "custom-data", "citehanko.sqlite"))).toBe(true);
-    expect(fs.existsSync(path.join(project.dir, ".citehanko"))).toBe(false);
+    expect(fs.existsSync(path.join(project.dir, "custom-data", "kahanyaku.sqlite"))).toBe(true);
+    expect(fs.existsSync(path.join(project.dir, ".kahanyaku"))).toBe(false);
   });
 });

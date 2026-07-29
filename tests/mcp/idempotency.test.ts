@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { createNoteDraftTool, CreateNoteDraftInput } from "../../src/mcp/tools/createNoteDraft.js";
 import { updateDraftTool } from "../../src/mcp/tools/updateDraft.js";
 import { withIdempotency, hashRequest } from "../../src/mcp/idempotency.js";
-import { CiteHankoError } from "../../src/core/errors.js";
+import { KahanyakuError } from "../../src/core/errors.js";
 import { makeTestContext, insertNoteFixture } from "../helpers.js";
 import { structured, errorPayload } from "./toolTestHelpers.js";
 
@@ -113,9 +113,9 @@ describe("idempotency (mutating MCP tools)", () => {
 
     expect(() =>
       withIdempotency(ctx, "test_tool", "retry-key", { a: 1 }, () => {
-        throw new CiteHankoError("invalid_input", "deliberate failure for the test");
+        throw new KahanyakuError("invalid_input", "deliberate failure for the test");
       }),
-    ).toThrow(CiteHankoError);
+    ).toThrow(KahanyakuError);
 
     const afterFailure = ctx.db.prepare("SELECT COUNT(*) AS c FROM idempotency_keys WHERE key = 'retry-key'").get() as {
       c: number;

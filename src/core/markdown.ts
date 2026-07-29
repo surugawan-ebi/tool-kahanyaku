@@ -9,7 +9,7 @@ import { createReviewService } from "./reviews.js";
 import { changedFields } from "./diff.js";
 import { buildSearchText } from "./searchText.js";
 import { findPossibleDuplicates } from "./duplicates.js";
-import { CiteHankoError } from "./errors.js";
+import { KahanyakuError } from "./errors.js";
 import { computeConfigHash } from "../config/config.js";
 import {
   getNoteRow,
@@ -270,7 +270,7 @@ export function importPath(ctx: AppContext, inputPath: string, opts: ImportOptio
     }
 
     // required_fields_for_verify passed; still run the full approve-time policy check (the
-    // same one a human `citehanko approve` would trigger) so e.g. reviewer_separation --
+    // same one a human `kahanyaku approve` would trigger) so e.g. reviewer_separation --
     // always true here, since the importer is necessarily also created_by for a brand-new
     // note -- surfaces in the import summary instead of silently skipping it.
     const approveWarnings = policy.checkApprove({
@@ -282,7 +282,7 @@ export function importPath(ctx: AppContext, inputPath: string, opts: ImportOptio
       scope: note.scope,
     });
 
-    // Same enforce-mode authorization as a human `citehanko approve` would apply. Unlike
+    // Same enforce-mode authorization as a human `kahanyaku approve` would apply. Unlike
     // that path, a rejection here doesn't abort the whole import -- it's downgraded to the
     // same "created as draft, could not verify" outcome as a missing required field, so one
     // note's policy violation doesn't stop the rest of the batch.
@@ -290,7 +290,7 @@ export function importPath(ctx: AppContext, inputPath: string, opts: ImportOptio
     try {
       scopeReviewerBypass = policy.assertApprovalAuthorized({ authorActor: note.created_by, scope: note.scope }).scopeReviewerBypass;
     } catch (err) {
-      if (err instanceof CiteHankoError) {
+      if (err instanceof KahanyakuError) {
         return { verified: false, reason: err.message };
       }
       throw err;

@@ -1,16 +1,16 @@
 {
-  "name": "citehanko",
+  "name": "kahanyaku",
   "version": "0.3.0",
-  "description": "A human approval stamp for the knowledge your AI may cite. Git-style review queue via MCP and CLI.",
+  "description": "AI proposes. Humans countersign. A human-governed review queue for knowledge AI agents may cite.",
   "type": "module",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/surugawan-ebi/tool-citehanko.git"
+    "url": "git+https://github.com/surugawan-ebi/tool-kahanyaku.git"
   },
-  "homepage": "https://github.com/surugawan-ebi/tool-citehanko#readme",
+  "homepage": "https://github.com/surugawan-ebi/tool-kahanyaku#readme",
   "bugs": {
-    "url": "https://github.com/surugawan-ebi/tool-citehanko/issues"
+    "url": "https://github.com/surugawan-ebi/tool-kahanyaku/issues"
   },
   "keywords": [
     "mcp",
@@ -24,7 +24,7 @@
     "sqlite"
   ],
   "bin": {
-    "citehanko": "dist/cli/index.js"
+    "kahanyaku": "dist/cli/index.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

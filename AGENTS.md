@@ -1,8 +1,9 @@
-# CiteHanko — Repository Rules
+# 加判役（Kahanyaku）— Repository Rules
 
 ## プロジェクト固有ルール
 
-- 製品名は`CiteHanko`、package・CLI・MCP server keyは`citehanko`とする。旧称との互換aliasは、公開前のclean breakでは追加しない。
+- 正式な製品名は`加判役`、ローマ字表記は`Kahanyaku`とする。日本語の紹介では初出を`加判役（Kahanyaku）`とし、package・CLI・MCP server keyは`kahanyaku`とする。旧称との互換aliasは、公開前のclean breakでは追加しない。
+- 中心思想は「AIが起案し、人が加判する」。AI自身が承認者または加判役であるように表現しない。
 - 仕様の正本は`docs/spec.md`と`docs/overall-design.md`、実装詳細は`docs/detailed-design.md`、意思決定ログは`docs/wall-discussion.md`とする。挙動変更時は該当文書との整合を確認する。
 - SQLiteがruntime stateの正本であり、Markdownはimport/export用snapshotとして扱う。verified noteを直接上書きせず、更新はproposal経由にする。
 - MCPにはapprove・reject・archive・auditを公開しない。ただしこれはworkflow上の操作境界であり、認証・OS sandbox・tamper-proof auditを提供するとは表現しない。

@@ -1,10 +1,10 @@
 import os from "node:os";
 import { openTestDb } from "../src/db/client.js";
-import { DEFAULT_CONFIG, type CiteHankoConfig } from "../src/config/config.js";
+import { DEFAULT_CONFIG, type KahanyakuConfig } from "../src/config/config.js";
 import type { AppContext } from "../src/core/context.js";
 import type { Role, NoteStatus, Confidence } from "../src/types/common.js";
 
-export function makeTestContext(overrides: Partial<AppContext> & { config?: Partial<CiteHankoConfig> } = {}): AppContext {
+export function makeTestContext(overrides: Partial<AppContext> & { config?: Partial<KahanyakuConfig> } = {}): AppContext {
   const { config: configOverrides, ...rest } = overrides;
   return {
     db: openTestDb(),

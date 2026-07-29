@@ -1,8 +1,12 @@
-# CiteHanko
+# 加判役（Kahanyaku）
 
-> A human approval stamp for the knowledge your AI may cite.
+> AIが起案し、人が加判する。
+>
+> AI proposes. Humans countersign.
 
-AIが見つけた知識を、そのまま組織の正式回答にしない。CiteHankoは、AIが引用してよい知識を人間がレビューし、`verified` として配布するローカルOSSです。
+AIが見つけた知識を、そのまま組織の正式回答にしない。加判役は、AIが引用してよい知識を人間がレビューし、`verified`として配布するローカルOSSです。
+
+名称の「加判役」は、最終判断に責任を持つ**人間**を指します。AIやソフトウェア自身が加判役になるのではなく、このツールは人間による加判の手続きと履歴を支えます。
 
 ```text
 AI / human proposes a draft
@@ -19,8 +23,8 @@ verified knowledge becomes available to agents through MCP
 必要なものはGitとNode.js 20または22 LTSです。デモは実際のCLIと一時SQLite databaseを使い、作業treeにはデータを残しません。
 
 ```bash
-git clone https://github.com/surugawan-ebi/tool-citehanko.git
-cd tool-citehanko
+git clone https://github.com/surugawan-ebi/tool-kahanyaku.git
+cd tool-kahanyaku
 npm ci
 npm run demo
 ```
@@ -37,20 +41,20 @@ npm run demo
 
 社内WikiやRAGの検索対象には、承認済み規定だけでなく、個人メモ、古い手順、レビュー中の案が混ざることがあります。検索できることと、AIが正式な根拠として引用してよいことは同じではありません。
 
-CiteHankoでは、AIまたは人間が新しい知識をdraftとして提案できます。しかし、MCPの通常検索が返す正式根拠は人間が承認した`verified` noteに限定されます。既存noteの更新やarchiveも、まずproposalとしてレビューqueueへ送られます。
+加判役では、AIまたは人間が新しい知識をdraftとして起案できます。しかし、MCPの通常検索が返す正式根拠は人間が承認した`verified` noteに限定されます。既存noteの更新やarchiveも、まずproposalとしてレビューqueueへ送られます。
 
 ## セキュリティ境界
 
-CiteHankoの「AIは提案、人間が承認」という分離は、公開する操作面を分けた**ワークフロー上の操作境界**です。強い認証、OS sandbox、権限分離を提供するセキュリティ製品ではありません。
+加判役の「AIは起案、人間が加判」という分離は、公開する操作面を分けた**ワークフロー上の操作境界**です。強い認証、OS sandbox、権限分離を提供するセキュリティ製品ではありません。
 
 - MCP serverはapprove、reject、archive操作をtoolとして公開しません。これらは人間向けCLIに限定しています。
-- 同じOS user、同じdata directoryへのshell権限を持つagentは、CLIを直接実行できます。CiteHanko単体ではそのagentから承認操作を防御できません。
+- 同じOS user、同じdata directoryへのshell権限を持つagentは、CLIを直接実行できます。加判役単体ではそのagentから承認操作を防御できません。
 - 信頼できないagentを扱う場合は、OS account、filesystem permission、container/sandbox、CLI executableへのaccessを別途分離してください。
 - historyと`config_hash`は判断過程の追跡を助けますが、改ざん耐性のある監査基盤や強い本人認証の代替ではありません。
 
-## CiteHankoとは何か（Verified Context Layer）
+## 加判役とは何か（Verified Context Layer）
 
-CiteHanko は「APIで記事を管理できるCMS」ではありません。中心にあるのは、AIエージェントが回答の根拠として使ってよい社内ナレッジを、
+加判役は「APIで記事を管理できるCMS」ではありません。中心にあるのは、AIエージェントが回答の根拠として使ってよい社内ナレッジを、
 
 1. AIまたは人間が **draft**（下書き）として提案し、
 2. 人間の reviewer が **approve / reject** し、
@@ -62,12 +66,12 @@ CiteHanko は「APIで記事を管理できるCMS」ではありません。中�
 
 ## 他のツールとの違い
 
-| | 何をするツールか | CiteHanko との違い |
+| | 何をするツールか | 加判役との違い |
 |---|---|---|
-| **WordPress / Headless CMS** | 人間向け記事をAPIで配信する | CiteHankoはCMSではなく、AIが引用してよい知識をレビュー・承認するガバナンス層。記事配信そのものが目的ではない |
-| **RAG（素朴な実装）** | 手元のドキュメントを検索してLLMに渡す | RAGは「検索できること」が目的になりがちで、検索対象の正しさ・承認状態を区別しない。CiteHankoは検索前に「承認済みかどうか」で対象を絞る |
-| **ContextNest** | 検証可能なcontext vaultの仕様（provenance/version/整合性） | ContextNestは暗号学的な検証可能性を追求する先行仕様。CiteHankoは同じ問題意識を持ちつつ、MVPでは実務で回るレビューワークフローとOSSとして触りやすいローカル実装を優先する |
-| **OpenWiki** | codebaseからagent-readable docsを生成・更新するCLI | OpenWikiは生成が主目的。CiteHankoはOpenWikiの生成物も含め、人間レビュアーが承認し配布する側を担当する |
+| **WordPress / Headless CMS** | 人間向け記事をAPIで配信する | 加判役はCMSではなく、AIが引用してよい知識をレビュー・承認するガバナンス層。記事配信そのものが目的ではない |
+| **RAG（素朴な実装）** | 手元のドキュメントを検索してLLMに渡す | RAGは「検索できること」が目的になりがちで、検索対象の正しさ・承認状態を区別しない。加判役は検索前に「承認済みかどうか」で対象を絞る |
+| **ContextNest** | 検証可能なcontext vaultの仕様（provenance/version/整合性） | ContextNestは暗号学的な検証可能性を追求する先行仕様。加判役は同じ問題意識を持ちつつ、MVPでは実務で回るレビューワークフローとOSSとして触りやすいローカル実装を優先する |
+| **OpenWiki** | codebaseからagent-readable docsを生成・更新するCLI | OpenWikiは生成が主目的。加判役はOpenWikiの生成物も含め、人間レビュアーが承認し配布する側を担当する |
 
 ## MVPでできること
 
@@ -79,15 +83,15 @@ CiteHanko は「APIで記事を管理できるCMS」ではありません。中�
 - Markdown import/export（`data/notes/`）
 - scope・owner・reviewer・actor の最小モデルと変更履歴（history、`get_note_history`による監査用サマリ取得つき）
 - scope別reviewer強制・reviewer_separation強制（`scope_reviewers` / `reviewer_separation`をenforceに切り替え可能。maintainerのbreak-glassとhistoryへの記録つき）
-- `citehanko audit`によるhistory eventのjsonl/csv export（監査・コンプライアンス用途）、承認時点のpolicyを追跡する`config_hash`
+- `kahanyaku audit`によるhistory eventのjsonl/csv export（監査・コンプライアンス用途）、承認時点のpolicyを追跡する`config_hash`
 - verified-onlyのデフォルト検索、`stale`（レビュー期限切れ）の可視化
 - LIKE検索とFTS5(trigram)検索の切り替え（`search_engine`設定）。日本語クエリでもFTS5の恩恵を受けられる
 
 ## インストールと手動クイックスタート
 
 ```bash
-git clone https://github.com/surugawan-ebi/tool-citehanko.git
-cd tool-citehanko
+git clone https://github.com/surugawan-ebi/tool-kahanyaku.git
+cd tool-kahanyaku
 npm ci
 npm run build
 npm link
@@ -96,48 +100,48 @@ npm link
 `examples/support-vault/` に、CSチームを想定した日本語ナレッジのサンプルが同梱されています（詳細は [`examples/README.md`](./examples/README.md)）。
 
 ```bash
-# 1. 初期化（.citehanko/citehanko.sqlite・config・data/notes/ を作成）
-citehanko init
+# 1. 初期化（.kahanyaku/kahanyaku.sqlite・config・data/notes/ を作成）
+kahanyaku init
 
 # 2. サンプルノートを import（draftとして取り込まれる）
-citehanko import examples/support-vault
+kahanyaku import examples/support-vault
 
 # 3. レビュー待ち一覧を確認（policy warningsは⚠、重複候補は≈で表示される）
-citehanko list --pending
+kahanyaku list --pending
 
 # 4. 中身を確認
-citehanko show <note_id>
+kahanyaku show <note_id>
 
 # 5. 承認（人間のレビュアーとして）
-citehanko approve <note_id> --actor human:reviewer --reason "内容を確認、正式ナレッジとして承認"
+kahanyaku approve <note_id> --actor human:reviewer --reason "内容を確認、正式ナレッジとして承認"
 
 # 6. verifiedになったノートを検索
-citehanko search "返金"
+kahanyaku search "返金"
 ```
 
-グローバルlinkを作らない場合は、`citehanko`を`node dist/cli/index.js`に読み替えてください。使い捨ての動作確認だけなら、作業treeに`.citehanko/`を作らない`npm run demo`を推奨します。
+グローバルlinkを作らない場合は、`kahanyaku`を`node dist/cli/index.js`に読み替えてください。使い捨ての動作確認だけなら、作業treeに`.kahanyaku/`を作らない`npm run demo`を推奨します。
 
 ## 起動方法
 
 ```bash
-# 初期化（.citehanko/citehanko.sqlite, citehanko.config.yaml, data/notes/ を作成）
-citehanko init [--data-dir <dir>]
+# 初期化（.kahanyaku/kahanyaku.sqlite, kahanyaku.config.yaml, data/notes/ を作成）
+kahanyaku init [--data-dir <dir>]
 
 # MCP stdioサーバを起動（AIクライアントから接続する）
-citehanko mcp [--actor <actor>] [--data-dir <dir>]
+kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
 ```
 
-データディレクトリの解決順は `--data-dir` > 環境変数 `CITEHANKO_HOME` > カレントの `./.citehanko/` です。actorの解決順は `--actor` > 環境変数 `CITEHANKO_ACTOR` > config の `default_actor` > OSユーザー名です。
+データディレクトリの解決順は `--data-dir` > 環境変数 `KAHANYAKU_HOME` > カレントの `./.kahanyaku/` です。actorの解決順は `--actor` > 環境変数 `KAHANYAKU_ACTOR` > config の `default_actor` > OSユーザー名です。
 
-## 設定（`citehanko.config.yaml`）
+## 設定（`kahanyaku.config.yaml`）
 
-`citehanko init` が `<データディレクトリ>/citehanko.config.yaml` を生成します。検索エンジンは `search_engine` で切り替えられます。
+`kahanyaku init` が `<データディレクトリ>/kahanyaku.config.yaml` を生成します。検索エンジンは `search_engine` で切り替えられます。
 
 ```yaml
 # auto: このSQLiteビルドがFTS5(trigram)対応ならFTS5、非対応ならLIKE。
 # like: 常にLIKE検索。
 # fts5: FTS5(trigram)を要求する。非対応環境では黙ってLIKEへフォールバックせず、
-#       起動時（`citehanko mcp`起動時、またはCLIコマンド実行時）に明確なエラーで落ちる。
+#       起動時（`kahanyaku mcp`起動時、またはCLIコマンド実行時）に明確なエラーで落ちる。
 search_engine: auto
 ```
 
@@ -158,7 +162,7 @@ scope_reviewers: warn
 
 - `reviewer_separation: enforce` は、承認者が対象の作成者/提案者本人である場合に承認を拒否します。**role に関わらずbypassできません**（自己承認そのものを禁止するルールのため）。
 - `scope_reviewers: enforce` は、承認者が対象noteの`scope`に対応する`scopes.<scope>.reviewers[]`に含まれない場合（scope未設定・reviewer未登録も同様）に承認を拒否します。**ただし`maintainer` roleはbreak-glassとして承認できます**。bypassした場合、その承認のhistory eventの`metadata`に`scope_reviewer_bypass: true`が記録されます。
-- 承認・却下・archive系のhistory eventには、決定時点の実効config全体をハッシュ化した`config_hash`が常に記録されます（`citehanko audit`で「どのpolicy下の決定か」を追跡できます）。
+- 承認・却下・archive系のhistory eventには、決定時点の実効config全体をハッシュ化した`config_hash`が常に記録されます（`kahanyaku audit`で「どのpolicy下の決定か」を追跡できます）。
 
 ### context pack
 
@@ -188,12 +192,12 @@ stdio transportで起動するため、Claude Desktop や `.mcp.json` 形式で�
 ```json
 {
   "mcpServers": {
-    "citehanko": {
+    "kahanyaku": {
       "command": "node",
-      "args": ["/absolute/path/to/tool-citehanko/dist/cli/index.js", "mcp"],
+      "args": ["/absolute/path/to/tool-kahanyaku/dist/cli/index.js", "mcp"],
       "env": {
-        "CITEHANKO_ACTOR": "agent:claude-desktop",
-        "CITEHANKO_HOME": "/absolute/path/to/tool-citehanko/.citehanko"
+        "KAHANYAKU_ACTOR": "agent:claude-desktop",
+        "KAHANYAKU_HOME": "/absolute/path/to/tool-kahanyaku/.kahanyaku"
       }
     }
   }
@@ -205,18 +209,18 @@ stdio transportで起動するため、Claude Desktop や `.mcp.json` 形式で�
 ```json
 {
   "mcpServers": {
-    "citehanko": {
+    "kahanyaku": {
       "command": "node",
       "args": ["dist/cli/index.js", "mcp"],
       "env": {
-        "CITEHANKO_ACTOR": "agent:codex"
+        "KAHANYAKU_ACTOR": "agent:codex"
       }
     }
   }
 }
 ```
 
-actor は MCP tool の入力からは受け取りません。stdio transport は MCP client ごとに別プロセスが起動するため、プロセス単位の `env`（`CITEHANKO_ACTOR`）や `--actor` でエージェントを識別します。
+actor は MCP tool の入力からは受け取りません。stdio transport は MCP client ごとに別プロセスが起動するため、プロセス単位の `env`（`KAHANYAKU_ACTOR`）や `--actor` でエージェントを識別します。
 
 ## AIクライアント向け利用プロトコル
 
@@ -250,18 +254,18 @@ mutating tool（`create_note_draft` / `update_draft` / `propose_note_update` / `
 ## CLIの使い方
 
 ```text
-citehanko init [--data-dir <dir>]
-citehanko mcp [--actor <actor>] [--data-dir <dir>]
-citehanko list [--pending] [--scope <s>] [--status <st>]
-citehanko search <query> [--include-archived] [--scope <s>] [--limit <n>]
-citehanko show <note_id|proposal_id>
-citehanko approve <id> [--actor <a>] [--reason <r>] [--role <role>]
-citehanko reject <id> --reason <r> [--actor <a>]
-citehanko archive <note_id> --reason <r> [--actor <a>]
-citehanko history <id>
-citehanko export [--out <dir>]
-citehanko import <path> [--verified] [--source <type>] [--commit <sha>]
-citehanko audit [--from <iso>] [--to <iso>] [--scope <s>] [--actor <a>] [--entity <id>] [--format jsonl|csv] [--out <file>] [--with-snapshots]
+kahanyaku init [--data-dir <dir>]
+kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
+kahanyaku list [--pending] [--scope <s>] [--status <st>]
+kahanyaku search <query> [--include-archived] [--scope <s>] [--limit <n>]
+kahanyaku show <note_id|proposal_id>
+kahanyaku approve <id> [--actor <a>] [--reason <r>] [--role <role>]
+kahanyaku reject <id> --reason <r> [--actor <a>]
+kahanyaku archive <note_id> --reason <r> [--actor <a>]
+kahanyaku history <id>
+kahanyaku export [--out <dir>]
+kahanyaku import <path> [--verified] [--source <type>] [--commit <sha>]
+kahanyaku audit [--from <iso>] [--to <iso>] [--scope <s>] [--actor <a>] [--entity <id>] [--format jsonl|csv] [--out <file>] [--with-snapshots]
 ```
 
 - `list --pending` はレビュー負債を可視化するコマンドです。scope/kind別の件数サマリ、作成日時の古い順一覧、各行の `⚠`（policy warning あり）/ `≈`（重複候補あり）フラグを表示します。
@@ -276,10 +280,10 @@ citehanko audit [--from <iso>] [--to <iso>] [--scope <s>] [--actor <a>] [--entit
 | **Note** | 知識単位。`status: draft \| verified \| archived \| rejected`、`confidence: low \| medium \| high`、`scope`、`owner`、`version`、`review_due_at` などを持つ |
 | **Update Proposal** | 既存verified noteへの変更案。`proposal_type: update \| archive_recommendation`、`status: pending_review \| approved \| rejected \| needs_rebase`、`base_note_version`、`diff`、`changed_fields` を持つ。`archive_recommendation`は内容変更を伴わず、承認されると対象noteがarchivedになる |
 | **History Event** | 全ての変更履歴（`note_created` / `note_verified` / `proposal_approved` など）。actor・role・reason・timestampを記録し、監査の土台にする。承認・却下・archive系は`config_hash`（決定時点のpolicy設定のハッシュ）も持つ |
-| **Context Pack** | `citehanko.config.yaml`の`context_packs`で定義する、名前つきのverified note集合。`scopes`(OR)・`tags`(AND)・`note_ids`(pin)で選択する |
+| **Context Pack** | `kahanyaku.config.yaml`の`context_packs`で定義する、名前つきのverified note集合。`scopes`(OR)・`tags`(AND)・`note_ids`(pin)で選択する |
 | **Source / Tag / Relation** | note に紐づく出典・タグ・関連ノート |
 
-正本は `.citehanko/citehanko.sqlite`。Markdownは `data/notes/<slug>--<note_id>.md` にexportされる可搬表現です。
+正本は `.kahanyaku/kahanyaku.sqlite`。Markdownは `data/notes/<slug>--<note_id>.md` にexportされる可搬表現です。
 
 ## 承認フローと role / scope
 
@@ -289,19 +293,19 @@ reviewer     担当scopeのdraft/proposalを承認・却下できる
 maintainer   schema・import/export・policy・scope設定を管理する
 ```
 
-- AIが作った draft はいきなり `verified` にはなりません。人間が `citehanko approve` するまでは review 待ちです。
+- AIが作った draft はいきなり `verified` にはなりません。人間が `kahanyaku approve` するまでは review 待ちです。
 - `propose_note_update` で作られた proposal は、承認時に `base_note_version` と現在の `note.version` が一致するかを検証します（optimistic lock）。不一致なら proposal は `needs_rebase` になり、AIは現行のverified noteを取得し直して再提案します。
 - `recommend_archive` で作られた proposal（`proposal_type: archive_recommendation`）は、承認時に対象noteが依然 `verified` であることだけを検証します（内容を適用するのではなく、対象note自体をarchivedにするため）。
 - 1つの proposal が承認されると、同じnoteに対する他の pending proposal（type問わず）は自動的に `needs_rebase` にカスケードします。
 - `reviewer` は `created_by`（作成者）と同一actorにしないことが推奨されます。デフォルトは警告（`reviewer_separation: warn`）ですが、`enforce`にすると承認そのものを拒否します（roleに関わらずbypass不可）。
 - 承認者は担当scopeの`reviewers[]`に登録されていることが推奨されます。デフォルトは警告（`scope_reviewers: warn`）ですが、`enforce`にすると未登録の承認者を拒否します（ただし`maintainer`はbreak-glassとして承認でき、その事実はhistoryに記録されます）。
-- 承認・却下・archiveは必ずhistoryに記録されます（`citehanko history <id>` で確認可能。横断的なexportは `citehanko audit`）。
+- 承認・却下・archiveは必ずhistoryに記録されます（`kahanyaku history <id>` で確認可能。横断的なexportは `kahanyaku audit`）。
 
 ## Markdown export/import と Git 運用
 
-- `citehanko export` で全status（rejected以外）のnoteを `data/notes/<slug>--<note_id>.md` に書き出します。実行のたびにディレクトリ内容が上書きされるため、`data/notes/` は生成物として `.gitignore` されています。
-- Markdownを直接編集した場合は `citehanko import <path>` で取り込みます。frontmatterに `id` が無い/未知のIDなら新規draft、既存draftならバージョンを上げて更新、既存verifiedとの差分があればupdate proposalになります。archived/rejectedのnoteをimport対象に含めると、そのファイルはスキップされ警告になります（バッチ全体は止まりません）。
-- 「PRレビュー = コード、CiteHankoレビュー = ナレッジ」という責務分離が運用の前提です。コード変更はGit/PRで、ナレッジ変更はCiteHankoのdraft/proposalレビューでレビューします。`data/notes/` をリポジトリに含める場合は、それがCiteHanko側でレビュー済みのexport結果であることを明記してください。
+- `kahanyaku export` で全status（rejected以外）のnoteを `data/notes/<slug>--<note_id>.md` に書き出します。実行のたびにディレクトリ内容が上書きされるため、`data/notes/` は生成物として `.gitignore` されています。
+- Markdownを直接編集した場合は `kahanyaku import <path>` で取り込みます。frontmatterに `id` が無い/未知のIDなら新規draft、既存draftならバージョンを上げて更新、既存verifiedとの差分があればupdate proposalになります。archived/rejectedのnoteをimport対象に含めると、そのファイルはスキップされ警告になります（バッチ全体は止まりません）。
+- 「PRレビュー = コード、加判役レビュー = ナレッジ」という責務分離が運用の前提です。コード変更はGit/PRで、ナレッジ変更は加判役のdraft/proposalレビューでレビューします。`data/notes/` をリポジトリに含める場合は、それが加判役側でレビュー済みのexport結果であることを明記してください。
 
 ## ライセンスとコントリビューション
 

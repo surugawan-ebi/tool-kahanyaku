@@ -1,6 +1,6 @@
 # examples/support-vault
 
-CS（カスタマーサポート）チームを想定した、CiteHanko へ取り込むためのサンプル Markdown ナレッジ集です。`citehanko import` の動作確認や、CiteHanko の承認フローを試すためのデモ vault として使えます。
+CS（カスタマーサポート）チームを想定した、加判役へ取り込むためのサンプル Markdown ナレッジ集です。`kahanyaku import` の動作確認や、加判役の承認フローを試すためのデモ vault として使えます。
 
 ## 収録ノート
 
@@ -14,12 +14,12 @@ CS（カスタマーサポート）チームを想定した、CiteHanko へ取�
 
 ## `pricing-faq.md` は意図的に不完全です
 
-`pricing-faq.md` だけ、他のノートと違って `source` を省略し、`summary` を20字未満（`"料金プランのFAQ"`）にしてあります。これは、CiteHanko の policy warning（`missing_source` / `summary_too_short`）が import 後のレビュー画面にどう表示されるかを確認するためのデモです。
+`pricing-faq.md` だけ、他のノートと違って `source` を省略し、`summary` を20字未満（`"料金プランのFAQ"`）にしてあります。これは、加判役の policy warning（`missing_source` / `summary_too_short`）が import 後のレビュー画面にどう表示されるかを確認するためのデモです。
 
-`citehanko import examples/support-vault` した後、
+`kahanyaku import examples/support-vault` した後、
 
-- `citehanko list --pending` の一覧で、この note の行にだけ `⚠` フラグが付く
-- `citehanko show <note_id>` で policy warnings 欄に `missing_source` / `summary_too_short` が表示される
+- `kahanyaku list --pending` の一覧で、この note の行にだけ `⚠` フラグが付く
+- `kahanyaku show <note_id>` で policy warnings 欄に `missing_source` / `summary_too_short` が表示される
 
 ことを確認できます。承認をブロックするものではなく、レビュー担当への注意喚起です。
 
@@ -27,29 +27,29 @@ CS（カスタマーサポート）チームを想定した、CiteHanko へ取�
 
 ```bash
 # 1. ワークスペースを初期化
-citehanko init
+kahanyaku init
 
 # 2. サンプルノートを import（すべて draft として取り込まれる）
-citehanko import examples/support-vault
+kahanyaku import examples/support-vault
 
 # 3. レビュー待ちの一覧を確認（pricing-faq.md に ⚠ が付いていることを確認）
-citehanko list --pending
+kahanyaku list --pending
 
 # 4. 中身を確認
-citehanko show <note_id>
+kahanyaku show <note_id>
 
 # 5. 承認して verified にする（reviewer 役なので --actor を変えるのが望ましい）
-citehanko approve <note_id> --actor human:reviewer --reason "内容を確認、正式ナレッジとして承認"
+kahanyaku approve <note_id> --actor human:reviewer --reason "内容を確認、正式ナレッジとして承認"
 
 # 6. verified になったノートを検索で確認
-citehanko search "返金"
+kahanyaku search "返金"
 ```
 
-`--verified` オプション付きで直接 import することもできますが（`citehanko import examples/support-vault --verified`）、その場合は `required_fields_for_verify`（デフォルトは `source` / `confidence` / `owner`）を満たさないノート（`pricing-faq.md`）は draft のまま残り、警告が表示されます。レビューフローそのものを確認したい場合は `--verified` を付けずに import するのがおすすめです。
+`--verified` オプション付きで直接 import することもできますが（`kahanyaku import examples/support-vault --verified`）、その場合は `required_fields_for_verify`（デフォルトは `source` / `confidence` / `owner`）を満たさないノート（`pricing-faq.md`）は draft のまま残り、警告が表示されます。レビューフローそのものを確認したい場合は `--verified` を付けずに import するのがおすすめです。
 
 ## context pack を試す
 
-このvaultのノートは全て `scope: support` です。`.citehanko/citehanko.config.yaml`（`citehanko init` が生成）に以下を追記すると、`get_context_pack` MCP toolでverified化した後のノートを一括取得できるデモができます。
+このvaultのノートは全て `scope: support` です。`.kahanyaku/kahanyaku.config.yaml`（`kahanyaku init` が生成）に以下を追記すると、`get_context_pack` MCP toolでverified化した後のノートを一括取得できるデモができます。
 
 ```yaml
 context_packs:

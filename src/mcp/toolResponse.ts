@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { CiteHankoError } from "../core/errors.js";
+import { KahanyakuError } from "../core/errors.js";
 
 export type ToolResult = CallToolResult;
 
@@ -16,9 +16,9 @@ export function okResult(structuredContent: Record<string, unknown>): ToolResult
 }
 
 /**
- * Uniform error envelope for every tool: CiteHankoError -> {code, message, details, retryable,
+ * Uniform error envelope for every tool: KahanyakuError -> {code, message, details, retryable,
  * suggested_action} JSON, returned as isError:true (per spec.md "共通仕様"). Anything that isn't
- * a CiteHankoError (a bug, not a modeled domain error) is still wrapped in the same shape so a
+ * a KahanyakuError (a bug, not a modeled domain error) is still wrapped in the same shape so a
  * tool call never throws past the SDK boundary; `internal_error` is not one of core/errors.ts's
  * ERROR_CODES on purpose, so it's easy to tell "expected domain error" apart from "unexpected bug"
  * in client logs.
@@ -34,7 +34,7 @@ export function okResult(structuredContent: Record<string, unknown>): ToolResult
  */
 export function errorResult(err: unknown): ToolResult {
   const payload =
-    err instanceof CiteHankoError
+    err instanceof KahanyakuError
       ? err.toJSON()
       : {
           code: "internal_error",

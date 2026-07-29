@@ -9,17 +9,17 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const cliEntry = path.join(repoRoot, "dist", "cli", "index.js");
 const exampleVault = path.join(repoRoot, "examples", "support-vault");
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "citehanko-demo-"));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-demo-"));
 const demoVault = path.join(dataDir, "examples", "support-vault");
 
 function run(args, { show = true } = {}) {
-  const command = `citehanko ${args.join(" ")}`;
+  const command = `kahanyaku ${args.join(" ")}`;
   if (show) console.log(`\n$ ${command}`);
 
   try {
     const output = execFileSync(process.execPath, [cliEntry, ...args], {
       cwd: dataDir,
-      env: { ...process.env, CITEHANKO_HOME: dataDir },
+      env: { ...process.env, KAHANYAKU_HOME: dataDir },
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -37,11 +37,11 @@ try {
     throw new Error(`Build output not found: ${cliEntry}. Run npm run build first.`);
   }
 
-  console.log("CiteHanko verified-context demo (temporary SQLite workspace)");
+  console.log("加判役（Kahanyaku）verified-context demo (temporary SQLite workspace)");
 
   run(["init", "--data-dir", dataDir]);
 
-  const configPath = path.join(dataDir, "citehanko.config.yaml");
+  const configPath = path.join(dataDir, "kahanyaku.config.yaml");
   const demoConfig = fs
     .readFileSync(configPath, "utf8")
     .replace("reviewer_separation: warn", "reviewer_separation: enforce")

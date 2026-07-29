@@ -34,7 +34,7 @@ export const ContextPackConfig = z.object({
 });
 export type ContextPackConfig = z.infer<typeof ContextPackConfig>;
 
-export const CiteHankoConfigSchema = z.object({
+export const KahanyakuConfigSchema = z.object({
   default_search_status: z.literal("verified").default("verified"),
   strict_stale_filter: z.boolean().default(false),
   default_review_interval_days: z.number().int().positive().default(90),
@@ -62,27 +62,27 @@ export const CiteHankoConfigSchema = z.object({
   // note_body_max_chars (an authoring-time policy_warning threshold, not a wire-size cap).
   max_body_chars: z.number().int().positive().default(8000),
 });
-export type CiteHankoConfig = z.infer<typeof CiteHankoConfigSchema>;
+export type KahanyakuConfig = z.infer<typeof KahanyakuConfigSchema>;
 
-export const DEFAULT_CONFIG: CiteHankoConfig = CiteHankoConfigSchema.parse({});
+export const DEFAULT_CONFIG: KahanyakuConfig = KahanyakuConfigSchema.parse({});
 
-export const CONFIG_FILE_NAME = "citehanko.config.yaml";
+export const CONFIG_FILE_NAME = "kahanyaku.config.yaml";
 
 /**
- * Loads `<dataDir>/citehanko.config.yaml`. Missing file, or a file with only
+ * Loads `<dataDir>/kahanyaku.config.yaml`. Missing file, or a file with only
  * some keys set, falls back to DEFAULT_CONFIG for the rest.
  */
-export function loadConfig(dataDir: string): CiteHankoConfig {
+export function loadConfig(dataDir: string): KahanyakuConfig {
   const configPath = path.join(dataDir, CONFIG_FILE_NAME);
   if (!fs.existsSync(configPath)) {
     return DEFAULT_CONFIG;
   }
   const raw = fs.readFileSync(configPath, "utf-8");
   const parsed = parseYaml(raw) ?? {};
-  return CiteHankoConfigSchema.parse(parsed);
+  return KahanyakuConfigSchema.parse(parsed);
 }
 
-/** Renders the default config as YAML text for `citehanko init` to write out. */
+/** Renders the default config as YAML text for `kahanyaku init` to write out. */
 export function renderDefaultConfigYaml(): string {
   return `default_search_status: verified
 strict_stale_filter: false
@@ -136,6 +136,6 @@ function stableStringify(value: unknown): string {
  * archive history events so an audit export can answer "which policy was this decided
  * under" without re-deriving it from the config file's git history.
  */
-export function computeConfigHash(config: CiteHankoConfig): string {
+export function computeConfigHash(config: KahanyakuConfig): string {
   return createHash("sha256").update(stableStringify(config)).digest("hex");
 }

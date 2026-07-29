@@ -3,7 +3,7 @@ import { createContext, type AppContext } from "../../core/context.js";
 import { createNoteService } from "../../core/notes.js";
 import { createReviewService } from "../../core/reviews.js";
 import { createPolicyService } from "../../core/policy.js";
-import { CiteHankoError } from "../../core/errors.js";
+import { KahanyakuError } from "../../core/errors.js";
 import { handleError } from "../context.js";
 import { renderNoteDetail, renderProposalDetail } from "../render.js";
 
@@ -37,7 +37,7 @@ export function registerShowCommand(program: Command): void {
           const item = reviews.getReviewItem(id);
           console.log(renderProposalDetail(item));
         } else {
-          throw new CiteHankoError("not_found", `${id} is not a recognized note_ or proposal_ id`, { details: { id } });
+          throw new KahanyakuError("not_found", `${id} is not a recognized note_ or proposal_ id`, { details: { id } });
         }
       } catch (err) {
         handleError(cmd, err);

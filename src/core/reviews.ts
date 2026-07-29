@@ -1,6 +1,6 @@
 import type { AppContext } from "./context.js";
 import { newId } from "./ids.js";
-import { CiteHankoError, parseOrThrow } from "./errors.js";
+import { KahanyakuError, parseOrThrow } from "./errors.js";
 import { createHistoryService } from "./history.js";
 import { createPolicyService } from "./policy.js";
 import { computeConfigHash } from "../config/config.js";
@@ -129,7 +129,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
 
   function requireNoteRow(id: string): NoteRow {
     const row = getNoteRow(db, id);
-    if (!row) throw new CiteHankoError("not_found", `${id} was not found`, { details: { id } });
+    if (!row) throw new KahanyakuError("not_found", `${id} was not found`, { details: { id } });
     return row;
   }
 
@@ -139,7 +139,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
 
   function requireProposalRow(id: string): ProposalRow {
     const row = getProposalRow(id);
-    if (!row) throw new CiteHankoError("not_found", `${id} was not found`, { details: { id } });
+    if (!row) throw new KahanyakuError("not_found", `${id} was not found`, { details: { id } });
     return row;
   }
 
@@ -173,19 +173,19 @@ export function createReviewService(ctx: AppContext): ReviewService {
       const note = requireNoteRow(input.id);
 
       if (note.status === "archived") {
-        throw new CiteHankoError("archived_target", `${input.id} is archived and cannot receive proposals`, {
+        throw new KahanyakuError("archived_target", `${input.id} is archived and cannot receive proposals`, {
           details: { status: note.status },
         });
       }
       if (note.status !== "verified") {
-        throw new CiteHankoError(
+        throw new KahanyakuError(
           "invalid_input",
           `${input.id} is ${note.status}, not verified. Only verified notes can receive update proposals.`,
           { details: { status: note.status }, suggested_action: "use update_draft for draft/rejected notes" },
         );
       }
       if (input.base_note_version !== note.version) {
-        throw new CiteHankoError(
+        throw new KahanyakuError(
           "version_conflict",
           `base_note_version ${input.base_note_version} does not match the current version ${note.version}`,
           {
@@ -217,7 +217,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
       );
 
       if (changed.length === 0) {
-        throw new CiteHankoError("empty_change", "no fields were changed by this proposal", {
+        throw new KahanyakuError("empty_change", "no fields were changed by this proposal", {
           suggested_action: "modify at least one field before proposing an update",
         });
       }
@@ -303,12 +303,12 @@ export function createReviewService(ctx: AppContext): ReviewService {
       const note = requireNoteRow(input.note_id);
 
       if (note.status === "archived") {
-        throw new CiteHankoError("archived_target", `${input.note_id} is already archived`, {
+        throw new KahanyakuError("archived_target", `${input.note_id} is already archived`, {
           details: { status: note.status },
         });
       }
       if (note.status !== "verified") {
-        throw new CiteHankoError(
+        throw new KahanyakuError(
           "not_verified",
           `${input.note_id} is ${note.status}, not verified. Only verified notes can receive an archive recommendation.`,
           { details: { status: note.status }, suggested_action: "use update_draft/get_review_item for draft/rejected notes" },
@@ -376,18 +376,18 @@ export function createReviewService(ctx: AppContext): ReviewService {
     approve(targetId: string, reason?: string): ApproveResult {
       if (targetId.startsWith("note_")) return approveNoteDraft(targetId, reason);
       if (targetId.startsWith("proposal_")) return approveProposal(targetId, reason);
-      throw new CiteHankoError("not_found", `${targetId} was not found`, { details: { id: targetId } });
+      throw new KahanyakuError("not_found", `${targetId} was not found`, { details: { id: targetId } });
     },
 
     reject(targetId: string, reason: string): RejectResult {
       if (!reason) {
-        throw new CiteHankoError("invalid_input", "reason is required to reject", {
+        throw new KahanyakuError("invalid_input", "reason is required to reject", {
           suggested_action: "provide a reason explaining the rejection",
         });
       }
       if (targetId.startsWith("note_")) return rejectNote(targetId, reason);
       if (targetId.startsWith("proposal_")) return rejectProposal(targetId, reason);
-      throw new CiteHankoError("not_found", `${targetId} was not found`, { details: { id: targetId } });
+      throw new KahanyakuError("not_found", `${targetId} was not found`, { details: { id: targetId } });
     },
 
     listReviewItems(filter: ReviewItemFilter): ListReviewItemsResult {
@@ -554,14 +554,14 @@ export function createReviewService(ctx: AppContext): ReviewService {
         }
         return detail;
       }
-      throw new CiteHankoError("not_found", `${id} was not found`, { details: { id } });
+      throw new KahanyakuError("not_found", `${id} was not found`, { details: { id } });
     },
   };
 
   function approveNoteDraft(id: string, reason?: string): ApproveResult {
     const note = requireNoteRow(id);
     if (note.status !== "draft") {
-      throw new CiteHankoError("invalid_input", `${id} is ${note.status}; only draft notes can be approved`, {
+      throw new KahanyakuError("invalid_input", `${id} is ${note.status}; only draft notes can be approved`, {
         details: { status: note.status },
       });
     }
@@ -634,7 +634,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
       });
     });
     markNeedsRebase();
-    throw new CiteHankoError(
+    throw new KahanyakuError(
       "version_conflict",
       `proposal ${proposal.id} is based on version ${proposal.base_note_version} but the note is now at version ${note.version}`,
       {
@@ -654,7 +654,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
   function approveProposal(id: string, reason?: string): ApproveResult {
     const proposal = requireProposalRow(id);
     if (proposal.status !== "pending_review") {
-      throw new CiteHankoError(
+      throw new KahanyakuError(
         "invalid_input",
         `${id} is ${proposal.status}; only pending_review proposals can be approved`,
         { details: { status: proposal.status }, suggested_action: "fetch current note and resubmit" },
@@ -669,7 +669,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
   function approveUpdateProposal(proposal: ProposalRow, reason?: string): ApproveResult {
     const note = requireNoteRow(proposal.note_id);
     if (note.status === "archived") {
-      throw new CiteHankoError("archived_target", `${proposal.note_id} is archived`, {
+      throw new KahanyakuError("archived_target", `${proposal.note_id} is archived`, {
         details: { status: note.status },
       });
     }
@@ -840,7 +840,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
       });
     });
     markNeedsRebase();
-    throw new CiteHankoError(
+    throw new KahanyakuError(
       "version_conflict",
       `archive recommendation ${proposal.id} cannot be applied: ${note.id} is no longer verified (current status: ${note.status})`,
       {
@@ -862,7 +862,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
   function approveArchiveRecommendation(proposal: ProposalRow, reason?: string): ApproveResult {
     const note = requireNoteRow(proposal.note_id);
     if (note.status === "archived") {
-      throw new CiteHankoError("archived_target", `${proposal.note_id} is already archived`, {
+      throw new KahanyakuError("archived_target", `${proposal.note_id} is already archived`, {
         details: { status: note.status },
       });
     }
@@ -962,7 +962,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
   function rejectNote(id: string, reason: string): RejectResult {
     const note = requireNoteRow(id);
     if (note.status !== "draft") {
-      throw new CiteHankoError("invalid_input", `${id} is ${note.status}; only draft notes can be rejected`, {
+      throw new KahanyakuError("invalid_input", `${id} is ${note.status}; only draft notes can be rejected`, {
         details: { status: note.status },
       });
     }
@@ -995,7 +995,7 @@ export function createReviewService(ctx: AppContext): ReviewService {
   function rejectProposal(id: string, reason: string): RejectResult {
     const proposal = requireProposalRow(id);
     if (proposal.status !== "pending_review" && proposal.status !== "needs_rebase") {
-      throw new CiteHankoError(
+      throw new KahanyakuError(
         "invalid_input",
         `${id} is ${proposal.status}; only pending_review or needs_rebase proposals can be rejected`,
         { details: { status: proposal.status } },

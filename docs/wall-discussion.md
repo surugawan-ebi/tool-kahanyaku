@@ -1,10 +1,10 @@
 ---
-title: CiteHanko 壁打ち判断メモ
+title: 加判役（Kahanyaku）壁打ち判断メモ
 updated: 2026-07-10
-summary: CiteHankoをOSSのVerified Context Layerとして固めるための主要判断メモ
+summary: 加判役をOSSのVerified Context Layerとして固めるための主要判断メモ
 ---
 
-# CiteHanko 壁打ち判断メモ
+# 加判役（Kahanyaku）壁打ち判断メモ
 
 ## 1. 正本はSQLiteかMarkdownか
 
@@ -21,9 +21,9 @@ MVPの正本はSQLiteにする。Markdownはimport/export、seed投入、人間�
 
 運用ルール:
 
-- `citehanko.sqlite`が実行時の正本
+- `kahanyaku.sqlite`が実行時の正本
 - `data/notes/*.md`はexport結果であり、上書きされうる
-- Markdownを直接編集したい場合は`citehanko import`で取り込む
+- Markdownを直接編集したい場合は`kahanyaku import`で取り込む
 - importで既存verified noteに差分がある場合は、直接上書きせずupdate proposalにする
 
 ## 2. `approve_note`をMCP toolとして公開するか
@@ -34,7 +34,7 @@ MVPでは公開しない。`approve_note`はCLI限定にする。
 
 理由:
 
-- AIがdraft作成からverified昇格まで完結できる経路を作ると、CiteHankoの安全性の主張が弱くなる
+- AIがdraft作成からverified昇格まで完結できる経路を作ると、加判役の安全性の主張が弱くなる
 - MCP client側のpermission approvalはクライアント依存で、プロダクトの安全境界としては不十分
 - 人間のレビュー操作はCLIに閉じた方が、初期実装と説明が単純になる
 
@@ -97,19 +97,19 @@ AIはdraft作成とupdate proposal作成まで。verified化とarchiveは人間�
 
 新規ノート:
 
-1. AIが`create_note_draft`、または人間が`citehanko import`でdraftを作る
-2. draftは`list_pending_reviews`と`citehanko list --pending`に出る
-3. 人間が`citehanko show <id>`で内容とsourceを見る
-4. 人間が`citehanko approve <id>`を実行すると`verified`になる
-5. 人間が`citehanko reject <id>`を実行すると`archived`になり、historyに`note_rejected`と理由を残す
+1. AIが`create_note_draft`、または人間が`kahanyaku import`でdraftを作る
+2. draftは`list_pending_reviews`と`kahanyaku list --pending`に出る
+3. 人間が`kahanyaku show <id>`で内容とsourceを見る
+4. 人間が`kahanyaku approve <id>`を実行すると`verified`になる
+5. 人間が`kahanyaku reject <id>`を実行すると`archived`になり、historyに`note_rejected`と理由を残す
 
 既存ノート更新:
 
 1. AIは`propose_note_update`でupdate proposalを作る
 2. proposalには`proposed_body`、`diff`、`reason`、`source`を保存する
-3. 人間が`citehanko show <proposal_id>`でdiffを見る
-4. 人間が`citehanko approve <proposal_id>`を実行すると対象ノートへ反映する
-5. 人間が`citehanko reject <proposal_id>`を実行するとproposalを`rejected`にする
+3. 人間が`kahanyaku show <proposal_id>`でdiffを見る
+4. 人間が`kahanyaku approve <proposal_id>`を実行すると対象ノートへ反映する
+5. 人間が`kahanyaku reject <proposal_id>`を実行するとproposalを`rejected`にする
 
 重要:
 
@@ -152,7 +152,7 @@ OSSとしてREADME、issue、release、package公開を自然に扱うために�
 理由:
 
 - このrepoは`ideas/<slug>/idea.md`を正本にするネタ帳であり、製品コードと依存関係を混ぜない方がよい
-- CiteHankoはCLI、MCP server、SQLite、テスト、npm packageを持つ独立プロダクトになる
+- 加判役はCLI、MCP server、SQLite、テスト、npm packageを持つ独立プロダクトになる
 - 別repoにするとREADME、package publish、issue、releaseを自然に管理できる
 
 このネタ帳側には、実装repoができた後に`repoUrl`や`localPath`をfrontmatterへ追加する。
@@ -188,7 +188,7 @@ OSS coreに含めるもの:
 判断:
 
 ContextNestは先行仕様として参考にする。  
-ただしCiteHankoは、verifiable context vaultそのものではなく、既存社内ナレッジをverified contextへ変換し、reviewerが承認してAI agentへ配るworkflowに寄せる。
+ただし加判役は、verifiable context vaultそのものではなく、既存社内ナレッジをverified contextへ変換し、reviewerが承認してAI agentへ配るworkflowに寄せる。
 
 取り込む点:
 
@@ -212,7 +212,7 @@ MVPでやらない点:
 判断:
 
 OpenWikiは、codebaseからagent-readable documentationを生成、更新するOSS CLIとして参考にする。  
-CiteHankoはcodebase docs generatorを作らず、OpenWikiなどが生成したdocsをsourceとして取り込み、reviewerがverified contextへ昇格するworkflowに寄せる。
+加判役はcodebase docs generatorを作らず、OpenWikiなどが生成したdocsをsourceとして取り込み、reviewerがverified contextへ昇格するworkflowに寄せる。
 
 取り込む点:
 
@@ -231,7 +231,7 @@ MVPでやらない点:
 棲み分け:
 
 - OpenWiki: codebaseをagent-readable docsに変換する
-- CiteHanko: docsや社内ナレッジをreviewer-approved contextとして配布する
+- Kahanyaku: docsや社内ナレッジをreviewer-approved contextとして配布する
 
 ## 11. 実装前に残る細部
 
@@ -241,7 +241,7 @@ MVPでやらない点:
 - SQLite schemaとmigration方針（version等の追加項目は12で決定。migration手順自体は未定）
 - note/proposal/historyのID生成方式 → 12で決定
 - proposal diffの形式 → 12で決定
-- `citehanko show`と`citehanko list --pending`の表示形式（未定）
+- `kahanyaku show`と`kahanyaku list --pending`の表示形式（未定）
 - Markdown import/exportの衝突時ルール → 12で決定
 - OSS repoのREADME骨子（未定）とライセンス方針 → 12で決定
 - 実装セッションに渡すプロンプト（未定）
@@ -311,11 +311,11 @@ search_notesの出力から`score`を削除し、`matched_fields`（マッチし
 
 MVPのLIKE検索では`score`は意味のある値を返せず、AIに偽の確信度を与えかねない。マッチ根拠が分かるmatched_fieldsとsnippetの方が、今のAIエージェントには実用的で誠実。
 
-### DBの置き場所は`.citehanko/`、WAL前提
+### DBの置き場所は`.kahanyaku/`、WAL前提
 
 判断:
 
-SQLiteの置き場所を`data/citehanko.sqlite`から`.citehanko/citehanko.sqlite`に統一する。WALモードを前提にし、busy_timeout、foreign_keys=ON、書き込みトランザクション、approve時のoptimistic lockを運用方針として明記する。
+SQLiteの置き場所を`data/kahanyaku.sqlite`から`.kahanyaku/kahanyaku.sqlite`に統一する。WALモードを前提にし、busy_timeout、foreign_keys=ON、書き込みトランザクション、approve時のoptimistic lockを運用方針として明記する。
 
 理由:
 
@@ -325,7 +325,7 @@ SQLiteの置き場所を`data/citehanko.sqlite`から`.citehanko/citehanko.sqlit
 
 判断:
 
-OSSライセンスはApache-2.0、IDはprefix + ULID、configはYAML、diffはunified diff文字列 + changed_fields、MCPサーバ起動コマンドは`citehanko mcp`に決定した。
+OSSライセンスはApache-2.0、IDはprefix + ULID、configはYAML、diffはunified diff文字列 + changed_fields、MCPサーバ起動コマンドは`kahanyaku mcp`に決定した。
 
 理由:
 
@@ -339,7 +339,7 @@ Apache-2.0は特許grantがあり企業導入のハードルを下げる。prefi
 
 理由:
 
-CiteHankoの一次利用者はMCP経由で呼び出すAI agentであり、人間はCLIでレビューする側に回る。tool数や入出力形式、エラー表現、再提出やリトライの経路まで、AIが誤解なく安全に使えることを設計の中心に置いた。
+加判役の一次利用者はMCP経由で呼び出すAI agentであり、人間はCLIでレビューする側に回る。tool数や入出力形式、エラー表現、再提出やリトライの経路まで、AIが誤解なく安全に使えることを設計の中心に置いた。
 
 ## 13. 仕様全体の壁打ちによる決定（2026-07-10）
 
@@ -359,7 +359,7 @@ CiteHankoの一次利用者はMCP経由で呼び出すAI agentであり、人間
 
 判断:
 
-最大の死因は「レビューキューの破産」と位置づけ、`citehanko list --pending`のscope/kind別サマリと古い順ソート、`citehanko import`実行時の新規draft/proposal/スキップ件数サマリ、`create_note_draft`の`possible_duplicates`警告で対策する。専用のtriageコマンドやlintコマンドは作らない。
+最大の死因は「レビューキューの破産」と位置づけ、`kahanyaku list --pending`のscope/kind別サマリと古い順ソート、`kahanyaku import`実行時の新規draft/proposal/スキップ件数サマリ、`create_note_draft`の`possible_duplicates`警告で対策する。専用のtriageコマンドやlintコマンドは作らない。
 
 理由:
 
@@ -373,7 +373,7 @@ CiteHankoの一次利用者はMCP経由で呼び出すAI agentであり、人間
 
 理由:
 
-9tool構成はAIが誤って未確定情報を根拠にしない設計（plane分離）はできていたが、「接続した直後に何を呼べばいいか」への回答がなかった。`get_note_history`（監査用）と`recommend_archive`（archive推薦）は初速に必須ではなく、`get_note_history`相当はCLIの`citehanko history`で足り、archive推薦は`propose_note_update`で代替できるため、MVPのtool数を絞り、入口の分かりやすさを優先した。
+9tool構成はAIが誤って未確定情報を根拠にしない設計（plane分離）はできていたが、「接続した直後に何を呼べばいいか」への回答がなかった。`get_note_history`（監査用）と`recommend_archive`（archive推薦）は初速に必須ではなく、`get_note_history`相当はCLIの`kahanyaku history`で足り、archive推薦は`propose_note_update`で代替できるため、MVPのtool数を絞り、入口の分かりやすさを優先した。
 
 ### no-resultsプロトコルとstaleの意味論
 
@@ -429,11 +429,11 @@ MVPの実態はローカルで動くOSSツールであり、部門横断のガ�
 
 判断:
 
-`data/notes/`はSQLiteからのexport生成物であり`.gitignore`を推奨する。追跡する場合はexport結果がCiteHanko側でレビュー済みという前提を明記する。「PRレビュー = コード、CiteHankoレビュー = ナレッジ」という責務分離を運用ルールとして記載する。
+`data/notes/`はSQLiteからのexport生成物であり`.gitignore`を推奨する。追跡する場合はexport結果が加判役側でレビュー済みという前提を明記する。「PRレビュー = コード、加判役レビュー = ナレッジ」という責務分離を運用ルールとして記載する。
 
 理由:
 
-生成物をGitで直接編集できるように見せると、CiteHankoのレビューフローを経ずにナレッジが変わる経路ができてしまう。コードとナレッジのレビュー主体を明確に分ける。
+生成物をGitで直接編集できるように見せると、加判役のレビューフローを経ずにナレッジが変わる経路ができてしまう。コードとナレッジのレビュー主体を明確に分ける。
 
 ### 結論: 条件付きGOの解消
 
@@ -463,11 +463,11 @@ MVPの実態はローカルで動くOSSツールであり、部門横断のガ�
 
 判断:
 
-`notes_fts`は`content='notes'`の外部コンテンツ型FTS5仮想テーブルにし、`notes`へのINSERT/UPDATE/DELETEをAFTERトリガー3本で同期する。migrationとしては新規に`002_fts5_search`を追加し（`001_init`は直接編集しない。既にリリース済みのため）、この中身はネストしたtransaction（SAVEPOINT）を外側のtry/catchで包んだbest-effort実装にする。FTS5/trigramをサポートしないSQLiteビルドでも`citehanko init`自体は失敗させない。
+`notes_fts`は`content='notes'`の外部コンテンツ型FTS5仮想テーブルにし、`notes`へのINSERT/UPDATE/DELETEをAFTERトリガー3本で同期する。migrationとしては新規に`002_fts5_search`を追加し（`001_init`は直接編集しない。既にリリース済みのため）、この中身はネストしたtransaction（SAVEPOINT）を外側のtry/catchで包んだbest-effort実装にする。FTS5/trigramをサポートしないSQLiteビルドでも`kahanyaku init`自体は失敗させない。
 
 理由:
 
-`notes`テーブルとは別に索引用データを二重管理したくないため、外部コンテンツテーブル（本文を持たず索引だけを持つ）を選んだ。`notes.id`はTEXT PRIMARY KEYなので、SQLiteの暗黙rowidを介したJOINで解決する設計にした。better-sqlite3のprebuiltバイナリではFTS5+trigramが有効なことを確認済みだが、将来別ビルドの環境で動く可能性を考えると、「full-text検索が使えない」ことが「CiteHankoそのものが起動できない」に直結するのは過剰なリスクである。LIKE検索は常に使えるので、FTS5は「あれば使う」機能に留め、非対応環境はLIKEへ自動的に倒れる設計にした。
+`notes`テーブルとは別に索引用データを二重管理したくないため、外部コンテンツテーブル（本文を持たず索引だけを持つ）を選んだ。`notes.id`はTEXT PRIMARY KEYなので、SQLiteの暗黙rowidを介したJOINで解決する設計にした。better-sqlite3のprebuiltバイナリではFTS5+trigramが有効なことを確認済みだが、将来別ビルドの環境で動く可能性を考えると、「full-text検索が使えない」ことが「加判役そのものが起動できない」に直結するのは過剰なリスクである。LIKE検索は常に使えるので、FTS5は「あれば使う」機能に留め、非対応環境はLIKEへ自動的に倒れる設計にした。
 
 ### search_engine設定はauto/like/fts5の3値、デフォルトauto
 
@@ -503,11 +503,11 @@ archive推薦には適用すべき本文差分が存在しない（「この内�
 
 判断:
 
-`get_note_history`の入力は`{id, limit?}`（note_/proposal_両対応）、出力は`{events: [{event_type, actor, role, scope, reason, created_at}]}`で、`before_snapshot`/`after_snapshot`は含めない。詳細なsnapshot・diffが必要な場合はCLIの`citehanko history <id>`を案内する。
+`get_note_history`の入力は`{id, limit?}`（note_/proposal_両対応）、出力は`{events: [{event_type, actor, role, scope, reason, created_at}]}`で、`before_snapshot`/`after_snapshot`は含めない。詳細なsnapshot・diffが必要な場合はCLIの`kahanyaku history <id>`を案内する。
 
 理由:
 
-snapshotはnote全体（tags/sourcesを含む）をJSON化して保存しており、AI向けのMCPレスポンスとしては大きすぎる。`get_note_history`の主な用途は「このnoteは最近誰が何をしたか」という監査・文脈把握であり、内容そのものの参照は`get_note`が担う。CLI側の`citehanko history`は人間向けに全snapshotまで見せる詳細版として役割を分ける。
+snapshotはnote全体（tags/sourcesを含む）をJSON化して保存しており、AI向けのMCPレスポンスとしては大きすぎる。`get_note_history`の主な用途は「このnoteは最近誰が何をしたか」という監査・文脈把握であり、内容そのものの参照は`get_note`が担う。CLI側の`kahanyaku history`は人間向けに全snapshotまで見せる詳細版として役割を分ける。
 
 ### 結論
 
@@ -565,11 +565,11 @@ context packは「用途に近いnoteをまとめて把握する」入口であ�
 
 2つの制約は性質が異なる。`scope_reviewers`は「担当外の人が承認した」という**組織的な役割分担のルール**であり、緊急時にmaintainerが介入できないと運用が詰まる（担当reviewerが不在、退職直後などのケースを想定）。一方`reviewer_separation`は「本人が自分の変更を承認した」という**自己承認そのものの禁止**であり、これを誰かがbypassできてしまうと、AI自身が承認者を演じる、あるいは特定の人物が常にmaintainer権限で自己承認する、といった抜け道が生まれる。この非対称性は意図的な設計であり、「役割分担の例外は運用上必要、自己承認の例外は原理的に認めない」という区別に基づく。
 
-### 監査exportは`citehanko audit`というCLI専用コマンドにする
+### 監査exportは`kahanyaku audit`というCLI専用コマンドにする
 
 判断:
 
-history_eventsをフィルタしてjsonl/csvでexportする機能は、MCP toolとしては公開せず、CLI専用（`citehanko audit`）にする。
+history_eventsをフィルタしてjsonl/csvでexportする機能は、MCP toolとしては公開せず、CLI専用（`kahanyaku audit`）にする。
 
 理由:
 
@@ -604,3 +604,15 @@ Team Workflow Packの主眼は「複数人・複数scopeでの運用を安全に
 理由:
 
 セクション13・14で固めた「AIは提案のみ、承認は人間のCLI限定」という安全境界を維持したまま、チーム運用（複数reviewer、複数scope、監査要件）に必要な最小限の機能を追加できた。`scope_reviewers`/`reviewer_separation`のデフォルトはどちらも`warn`のままなので、既存のsolo運用やチーム未整備の利用者には挙動の変化がない。
+
+## 16. 製品名を「加判役」に確定（2026-07-29）
+
+判断:
+
+正式な製品名を`加判役`、ローマ字表記を`Kahanyaku`にする。package、CLI、MCP server keyは`kahanyaku`、repository名は`tool-kahanyaku`とする。初期名`AgentPress`と検討名`CiteHanko`からの公開前clean breakとして、旧称のCLI、環境変数、data directory、型名、設定名に互換aliasは残さない。
+
+中心となる説明は「AIが起案し、人が加判する。」、英語では「AI proposes. Humans countersign.」とする。
+
+理由:
+
+`加判役`は、重要な文書や意思決定に責任を持って加判する人間側の役割を表す。AIがdraftやproposalを起案し、人間だけが正式な根拠として承認する本製品の操作境界と一致する。名称に`AI`を冠すると「AI自身が加判役になる」と誤読されるため採用しない。説明文でもAIを承認者・加判役として扱わず、製品は人間のレビュー、承認、履歴管理を支える仕組みとして表現する。

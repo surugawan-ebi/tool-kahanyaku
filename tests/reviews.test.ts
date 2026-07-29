@@ -1,14 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { createReviewService } from "../src/core/reviews.js";
-import { CiteHankoError } from "../src/core/errors.js";
+import { KahanyakuError } from "../src/core/errors.js";
 import { makeTestContext, insertNoteFixture } from "./helpers.js";
 import type { AppContext } from "../src/core/context.js";
 
-function captureError(fn: () => unknown): CiteHankoError {
+function captureError(fn: () => unknown): KahanyakuError {
   try {
     fn();
   } catch (err) {
-    return err as CiteHankoError;
+    return err as KahanyakuError;
   }
   throw new Error("expected function to throw");
 }
@@ -143,7 +143,7 @@ describe("approve - draft note", () => {
     insertNoteFixture(ctx, { id: "note_v4", status: "verified" });
     const reviews = createReviewService(ctx);
 
-    expect(() => reviews.approve("note_v4")).toThrow(CiteHankoError);
+    expect(() => reviews.approve("note_v4")).toThrow(KahanyakuError);
   });
 });
 
@@ -323,7 +323,7 @@ describe("approve - proposal", () => {
     const { proposal } = reviews.createProposal(proposalInput({ id: "note_v8" }));
     reviews.approve(proposal.id);
 
-    expect(() => reviews.approve(proposal.id)).toThrow(CiteHankoError);
+    expect(() => reviews.approve(proposal.id)).toThrow(KahanyakuError);
   });
 });
 
@@ -355,7 +355,7 @@ describe("reject", () => {
     insertNoteFixture(ctx, { id: "note_d5", status: "draft" });
     const reviews = createReviewService(ctx);
 
-    expect(() => reviews.reject("note_d5", "")).toThrow(CiteHankoError);
+    expect(() => reviews.reject("note_d5", "")).toThrow(KahanyakuError);
   });
 
   it("refuses to reject a note that is not a draft", () => {
@@ -363,7 +363,7 @@ describe("reject", () => {
     insertNoteFixture(ctx, { id: "note_v10", status: "verified" });
     const reviews = createReviewService(ctx);
 
-    expect(() => reviews.reject("note_v10", "no")).toThrow(CiteHankoError);
+    expect(() => reviews.reject("note_v10", "no")).toThrow(KahanyakuError);
   });
 });
 

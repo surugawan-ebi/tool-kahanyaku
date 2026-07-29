@@ -11,7 +11,7 @@ import { makeTestContext, insertNoteFixture } from "./helpers.js";
 
 const tmpDirs: string[] = [];
 function tmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "citehanko-md-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-md-"));
   tmpDirs.push(dir);
   return dir;
 }

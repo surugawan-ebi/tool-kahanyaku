@@ -1,9 +1,9 @@
 import type { AppContext } from "./context.js";
-import type { CiteHankoDb } from "../db/client.js";
+import type { KahanyakuDb } from "../db/client.js";
 import { getTags, isStale, type NoteRow } from "./noteRows.js";
 import { normalizeForSearch } from "./searchText.js";
 import { buildCitation, type Citation } from "./citation.js";
-import { CiteHankoError } from "./errors.js";
+import { KahanyakuError } from "./errors.js";
 import type { Confidence, NoteStatus } from "../types/common.js";
 
 const SNIPPET_RADIUS = 60;
@@ -94,7 +94,7 @@ interface ScoredCandidate {
  * shapes for the same underlying data.
  */
 function scoreCandidates(
-  db: CiteHankoDb,
+  db: KahanyakuDb,
   rows: NoteRow[],
   terms: string[],
   ftsScores: Map<string, number>,
@@ -207,7 +207,7 @@ function finalizeResults(
 }
 
 function likeCandidateRows(
-  db: CiteHankoDb,
+  db: KahanyakuDb,
   statuses: NoteStatus[],
   scope: string | null | undefined,
   tags: string[] | undefined,
@@ -259,7 +259,7 @@ export function createLikeSearchEngine(ctx: AppContext): SearchEngine {
 /** SELECT 1 FROM sqlite_master: cheap presence check for the notes_fts table migration
  *  002 creates best-effort (see migrations.ts). This is the single source of truth for
  *  "can this environment actually do FTS5(trigram) search". */
-export function hasFts5TrigramSupport(db: CiteHankoDb): boolean {
+export function hasFts5TrigramSupport(db: KahanyakuDb): boolean {
   try {
     return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'notes_fts'").get();
   } catch {
@@ -284,7 +284,7 @@ interface FtsQueryResult {
  *  quoting) so the caller can fall back to LIKE for the whole search instead of partially
  *  applying FTS. */
 function ftsCandidateRows(
-  db: CiteHankoDb,
+  db: KahanyakuDb,
   statuses: NoteStatus[],
   scope: string | null | undefined,
   tags: string[] | undefined,
@@ -396,12 +396,12 @@ export function createSearchEngine(ctx: AppContext): SearchEngine {
   const available = hasFts5TrigramSupport(ctx.db);
   if (mode === "fts5") {
     if (!available) {
-      throw new CiteHankoError(
+      throw new KahanyakuError(
         "invalid_input",
         'search_engine: "fts5" is configured, but this environment\'s SQLite build does not support the FTS5 trigram tokenizer',
         {
           suggested_action:
-            'set search_engine: "like" (or "auto") in citehanko.config.yaml, or use a better-sqlite3 build with FTS5 trigram support',
+            'set search_engine: "like" (or "auto") in kahanyaku.config.yaml, or use a better-sqlite3 build with FTS5 trigram support',
         },
       );
     }

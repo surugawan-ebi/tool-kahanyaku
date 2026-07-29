@@ -1,5 +1,5 @@
 ---
-title: CiteHanko / Verified Context Layer for AI Agents
+title: 加判役（Kahanyaku）/ Verified Context Layer for AI Agents
 status: spec
 updated: 2026-07-10
 canonical: neta
@@ -13,16 +13,18 @@ tags:
 summary: AIエージェント向け社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー
 ---
 
-# CiteHanko / Verified Context Layer for AI Agents
+# 加判役（Kahanyaku）/ Verified Context Layer for AI Agents
 
 ## One Line
 
-A human approval stamp for the knowledge your AI may cite.
+AIが起案し、人が加判する。
+
+AI proposes. Humans countersign.
 
 製品カテゴリとしては、AI向けナレッジのGit-style review queue。
 
 AIエージェント向け社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフロー。  
-NotionやConfluenceが人間向けのknowledge baseなら、CiteHankoはAI agentが使ってよいverified contextを配る層。
+NotionやConfluenceが人間向けのknowledge baseなら、加判役はAI agentが使ってよいverified contextを配る層。
 
 ## Why now
 
@@ -113,8 +115,8 @@ MVPで検証すること:
 
 - Headless CMS: content APIはあるが、AI向け承認、citation、proposal workflowが中心ではない
 - RAG/vector DB: 関連文書を探せるが、承認済みか、現行か、誰が責任を持つかは別問題
-- ContextNest: verifiable context vaultの仕様と参照実装。CiteHankoは実務のproposal/review/approve workflowへ寄せる
-- OpenWiki: codebaseからagent-readable docsを生成、更新するCLI。CiteHankoは生成されたdocsも含め、AIが使ってよいverified contextとして承認、配布する層
+- ContextNest: verifiable context vaultの仕様と参照実装。加判役は実務のproposal/review/approve workflowへ寄せる
+- OpenWiki: codebaseからagent-readable docsを生成、更新するCLI。加判役は生成されたdocsも含め、AIが使ってよいverified contextとして承認、配布する層
 
 ## Documents
 

@@ -1,10 +1,10 @@
 ---
-title: CiteHanko 詳細設計
+title: 加判役（Kahanyaku）詳細設計
 updated: 2026-07-10
 summary: MVP実装のための技術選定、DBスキーマ、サービスAPI、MCP/CLI設計、テスト計画、実装タスク分割
 ---
 
-# CiteHanko 詳細設計
+# 加判役（Kahanyaku）詳細設計
 
 [spec.md](./spec.md) と [overall-design.md](./overall-design.md) で確定した仕様を、実装可能な粒度に落とす。仕様との矛盾が見つかった場合は spec.md / overall-design.md が正であり、この文書を直す。
 
@@ -23,12 +23,12 @@ summary: MVP実装のための技術選定、DBスキーマ、サービスAPI、
 | ID | ulid | prefixed ULID (`note_01…`) |
 | test | vitest | 仕様どおり |
 
-ビルドは `tsc` のみ（bundler なし）。`bin.citehanko` は `dist/cli/index.js` を指す。
+ビルドは `tsc` のみ（bundler なし）。`bin.kahanyaku` は `dist/cli/index.js` を指す。
 
 ## リポジトリ構成
 
 ```text
-tool-citehanko/（このrepo直下）
+tool-kahanyaku/（このrepo直下）
   package.json  tsconfig.json  vitest.config.ts  LICENSE(Apache-2.0)  README.md
   src/
     index.ts                  # ライブラリexport（core再export）
@@ -44,7 +44,7 @@ tool-citehanko/（このrepo直下）
       context.ts              # AppContext（db, config, actor, role）生成
       notes.ts reviews.ts search.ts contextPacks.ts policy.ts history.ts registry.ts
       markdown.ts diff.ts duplicates.ts
-      errors.ts               # CiteHankoError + エラーコード
+      errors.ts               # KahanyakuError + エラーコード
       ids.ts                  # newId('note'|'proposal'|'hist'|'src'|'batch')
     db/
       client.ts               # openDb: WAL, busy_timeout=5000, foreign_keys=ON
@@ -181,7 +181,7 @@ CREATE TABLE schema_migrations (
 );
 ```
 
-migration 002（`002_fts5_search`）で以下を追加。SQLite が FTS5 + trigram tokenizer をサポートしない環境でも `citehanko init` 自体は失敗させたくないため、この migration の本体は **best-effort**（ネストした `db.transaction()` = SAVEPOINT を外側の try/catch で包み、失敗時は `notes_fts` が単に存在しないままになる）にする。migration自体は「適用済み」として `schema_migrations` に記録される（DDL失敗を握りつぶすだけで、migration runner 自体は失敗させない）。
+migration 002（`002_fts5_search`）で以下を追加。SQLite が FTS5 + trigram tokenizer をサポートしない環境でも `kahanyaku init` 自体は失敗させたくないため、この migration の本体は **best-effort**（ネストした `db.transaction()` = SAVEPOINT を外側の try/catch で包み、失敗時は `notes_fts` が単に存在しないままになる）にする。migration自体は「適用済み」として `schema_migrations` に記録される（DDL失敗を握りつぶすだけで、migration runner 自体は失敗させない）。
 
 ```sql
 CREATE VIRTUAL TABLE notes_fts USING fts5(
@@ -219,7 +219,7 @@ INSERT INTO notes_fts(notes_fts) VALUES('rebuild');
 
 ## 設定・コンテキスト
 
-`.citehanko/citehanko.config.yaml`（`citehanko init` が生成）:
+`.kahanyaku/kahanyaku.config.yaml`（`kahanyaku init` が生成）:
 
 ```yaml
 default_search_status: verified
@@ -257,14 +257,14 @@ context_packs:
 - `scope_reviewers: enforce` は、承認者が対象noteの `scope` に対応する `scopes.<scope>.reviewers[]` に含まれない場合（scope未設定・reviewer未登録も同様）に発火するが、**`ctx.role === "maintainer"` はbreak-glassとして承認を継続できる**。継続した場合、`ReviewService` は承認成功時の history event の `metadata` に `scope_reviewer_bypass: true` を追加する
 - `computeConfigHash(config)`（`config.ts`、SHA-256・key順序に依存しない正規化JSON）を承認/却下/archive系の history event 全てに `config_hash` として記録する（`markdown.ts` の `--verified` import 経路も含む）
 
-- 解決順: CLI は `--actor` > env `CITEHANKO_ACTOR` > config `default_actor` > OS user。role は `--role` > env `CITEHANKO_ROLE` > `contributor`（approve/reject/archive コマンドは既定 `reviewer`）
+- 解決順: CLI は `--actor` > env `KAHANYAKU_ACTOR` > config `default_actor` > OS user。role は `--role` > env `KAHANYAKU_ROLE` > `contributor`（approve/reject/archive コマンドは既定 `reviewer`）
 - MCP server は起動時に `--actor` / env を読み、**tool 入力からは一切受けない**
 - `AppContext = { db, config, dataDir, actor, role }` を core/context.ts で生成し、CLI/MCP 両方が同じ関数を通る
-- データディレクトリ解決: `--data-dir` > env `CITEHANKO_HOME` > カレントの `.citehanko/`
+- データディレクトリ解決: `--data-dir` > env `KAHANYAKU_HOME` > カレントの `.kahanyaku/`
 
 ## エラーと警告
 
-`CiteHankoError extends Error`: `{ code, message, details?, retryable, suggested_action? }`。MCP tool ではこれを JSON で返し（`isError: true`）、CLI では人間向けに整形する。
+`KahanyakuError extends Error`: `{ code, message, details?, retryable, suggested_action? }`。MCP tool ではこれを JSON で返し（`isError: true`）、CLI では人間向けに整形する。
 
 エラーコード: `not_found` `not_verified` `invalid_input` `empty_change` `version_conflict` `archived_target` `rejected_target` `not_draft_owner` `slug_conflict`(import時のみ) `io_error` `in_progress`(idempotency_key が使用中。version_conflict とは別系統) `policy_violation`(reviewer_separation/scope_reviewers の enforce モードで拒否)
 
@@ -355,7 +355,7 @@ getRegistryOverview(scope?): RegistryOverview  // schema_version, server_version
 // history.ts
 record(event): void
 listByEntity(entityId): HistoryEvent[]
-queryEvents(query: { from?, to?, scope?, actor?, entityId? }): HistoryEvent[]  // citehanko audit 用の横断フィルタ
+queryEvents(query: { from?, to?, scope?, actor?, entityId? }): HistoryEvent[]  // kahanyaku audit 用の横断フィルタ
 
 // markdown.ts
 exportAll(outDir): ExportSummary               // <slug>--<id>.md, frontmatterにDB metadata
@@ -379,26 +379,26 @@ changedFields(input, note): string[]
 - レスポンスは `structuredContent`（構造化 JSON）を正とし、`content: [{type:"text", text: JSON.stringify(result)}]` を fallback として併記。エラーは `isError: true` + エラー JSON
 - mutating tool（create_note_draft / update_draft / propose_note_update / recommend_archive）は `idempotency.ts` のラッパを通す。予約は `(key, tool, actor)` 単位（同一keyでもactorが違えば別予約。MCPサーバはactorごとに別プロセスで起動するため）。フロー: (1) 短い独立トランザクションで予約行を INSERT して即 commit し、他プロセスからも `in_progress` が見えるようにする（既存行あり: `completed` なら保存済み結果を返す。`in_progress` かつ10分以内なら `in_progress` retryable エラー。10分より古い`in_progress`は放棄されたとみなし上書きして予約を取得する。`request_hash` 不一致なら `invalid_input`）→ (2) 予約 tx の外で mutation を実行（失敗時は `finally` で予約行を削除しリトライ可能にする）→ (3) 成功時に `result_json` を保存し `completed` に更新。`get_note_history` / `get_context_pack` は読み取り専用のため idempotency ラッパを通さない
 - `propose_note_update` の入力に `base_note_version`（必須）を追加。get_note の citation.version をそのまま渡す想定
-- `buildMcpServer(ctx)` は tool 登録の前に `createSearchEngine(ctx)` を1回呼ぶ（結果は破棄。`search_notes` は呼び出しごとに自分でも構築する）。これにより `search_engine: "fts5"` を明示指定した環境が非対応の場合、サーバ構築時点（`citehanko mcp` 起動時）で即エラーになり、最初の検索まで気づかないという事態を防ぐ
+- `buildMcpServer(ctx)` は tool 登録の前に `createSearchEngine(ctx)` を1回呼ぶ（結果は破棄。`search_notes` は呼び出しごとに自分でも構築する）。これにより `search_engine: "fts5"` を明示指定した環境が非対応の場合、サーバ構築時点（`kahanyaku mcp` 起動時）で即エラーになり、最初の検索まで気づかないという事態を防ぐ
 - search_notes の 0 件時は仕様どおり `no_results: true` / `guidance` / `suggested_next_tools` / `searched_statuses`（FTS→LIKEフォールバック適用後の最終結果に対して判定）
 - citation は `{label, note_id, version, updated_at, review_due_at, stale, confidence, status, scope}` を共通ヘルパで生成
-- `citehanko mcp` コマンドが `StdioServerTransport` で起動。stdout は MCP protocol 専用、ログは stderr
+- `kahanyaku mcp` コマンドが `StdioServerTransport` で起動。stdout は MCP protocol 専用、ログは stderr
 
 ## CLI 設計
 
 ```text
-citehanko init [--data-dir <dir>]
-citehanko mcp [--actor <actor>] [--data-dir <dir>]
-citehanko list [--pending] [--scope <s>] [--status <st>]
-citehanko search <query> [--include-archived]
-citehanko show <note_id|proposal_id>
-citehanko approve <id> [--actor a] [--reason r] [--role reviewer]
-citehanko reject <id> --reason r [--actor a]
-citehanko archive <note_id> --reason r [--actor a]
-citehanko history <id>
-citehanko export [--out data/notes]
-citehanko import <path> [--verified] [--source <type>] [--commit <sha>]
-citehanko audit [--from <iso>] [--to <iso>] [--scope <s>] [--actor <a>] [--entity <id>] [--format jsonl|csv] [--out <file>] [--with-snapshots]
+kahanyaku init [--data-dir <dir>]
+kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
+kahanyaku list [--pending] [--scope <s>] [--status <st>]
+kahanyaku search <query> [--include-archived]
+kahanyaku show <note_id|proposal_id>
+kahanyaku approve <id> [--actor a] [--reason r] [--role reviewer]
+kahanyaku reject <id> --reason r [--actor a]
+kahanyaku archive <note_id> --reason r [--actor a]
+kahanyaku history <id>
+kahanyaku export [--out data/notes]
+kahanyaku import <path> [--verified] [--source <type>] [--commit <sha>]
+kahanyaku audit [--from <iso>] [--to <iso>] [--scope <s>] [--actor <a>] [--entity <id>] [--format jsonl|csv] [--out <file>] [--with-snapshots]
 ```
 
 - `list --pending`: 冒頭に scope/kind 別件数サマリ → 古い順の一覧。各行に `⚠ warnings` / `≈ dup` フラグ
@@ -417,7 +417,7 @@ frontmatter は spec.md の Knowledge Note 例に従う（id, slug, title, type,
 
 ## example vault
 
-`examples/support-vault/`: CS チーム想定の Markdown 5〜6 枚（返金ポリシー、エスカレーション基準、対応SOP、禁止事項、料金FAQ）。うち 1 枚は source 無しで「レビューで警告が出る」デモ用。README に `citehanko init && citehanko import examples/support-vault --verified` からの一連のデモ手順を書く。日本語ノートを含め、LIKE 検索が日本語で当たることを見せる。
+`examples/support-vault/`: CS チーム想定の Markdown 5〜6 枚（返金ポリシー、エスカレーション基準、対応SOP、禁止事項、料金FAQ）。うち 1 枚は source 無しで「レビューで警告が出る」デモ用。README に `kahanyaku init && kahanyaku import examples/support-vault --verified` からの一連のデモ手順を書く。日本語ノートを含め、LIKE 検索が日本語で当たることを見せる。
 
 ## テスト計画
 
@@ -441,10 +441,10 @@ frontmatter は spec.md の Knowledge Note 例に従う（id, slug, title, type,
 4. **Phase 3b**: MCP server + 8 tools + idempotency + tests（3a と並行可。src/mcp/ と tests/mcp* のみ触る）
 5. **Phase 4**: examples/support-vault + README + E2E 検証（実 CLI 実行 + MCP stdio 疎通）+ 完了条件チェック
 6. **Phase 2 機能追加**（初期MVP完了後）: migration 002（`notes_fts` + トリガー）+ `Fts5SearchEngine` + `search_engine`設定 + `recommend_archive`（reviews.ts / MCP tool / CLI表示）+ `get_note_history`（MCP tool）+ MCP 8→10 tools + docs/README更新 + version 0.2.0
-7. **Team Workflow Pack**（v0.2.0完了後）: `contextPacks.ts` + `get_context_pack`（MCP tool）+ `get_registry_overview`のcontext_packs[] + scope_reviewers/reviewer_separationのenforce実装（policy.ts/reviews.ts） + `policy_violation`エラーコード + `config_hash`のhistory記録 + `citehanko audit`（CLI） + `history.queryEvents` + MCP 10→11 tools + docs/README更新 + version 0.3.0
+7. **Team Workflow Pack**（v0.2.0完了後）: `contextPacks.ts` + `get_context_pack`（MCP tool）+ `get_registry_overview`のcontext_packs[] + scope_reviewers/reviewer_separationのenforce実装（policy.ts/reviews.ts） + `policy_violation`エラーコード + `config_hash`のhistory記録 + `kahanyaku audit`（CLI） + `history.queryEvents` + MCP 10→11 tools + docs/README更新 + version 0.3.0
 
 Phase 1 で全依存を package.json に入れる（後続 phase は package.json を触らない）。
 
 ## 完了条件
 
-spec.md の Completion Criteria に従う: `npm install` / `npm run build` / `npm test` が通る、`citehanko init` で初期化できる、`citehanko mcp` で MCP サーバが起動する、11 tools が使える、CLI で検索・表示・承認・却下・archive・audit ができる、Markdown export/importができる、README が書かれている、example vault が同梱されている。
+spec.md の Completion Criteria に従う: `npm install` / `npm run build` / `npm test` が通る、`kahanyaku init` で初期化できる、`kahanyaku mcp` で MCP サーバが起動する、11 tools が使える、CLI で検索・表示・承認・却下・archive・audit ができる、Markdown export/importができる、README が書かれている、example vault が同梱されている。

@@ -24,8 +24,8 @@ import { registerAuditCommand } from "./commands/audit.js";
 export function buildProgram(): Command {
   const program = new Command();
   program
-    .name("citehanko")
-    .description("A human approval stamp for the knowledge your AI may cite.")
+    .name("kahanyaku")
+    .description("AI proposes. Humans countersign. Human-governed knowledge review for AI agents.")
     .exitOverride();
 
   registerInitCommand(program);

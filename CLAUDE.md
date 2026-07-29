@@ -1,4 +1,4 @@
-# CiteHanko ワークスペースルール
+# 加判役（Kahanyaku）ワークスペースルール
 
 ## イラスト・画像生成ルール
 
@@ -8,14 +8,14 @@
 
 ## プロジェクト概要
 
-CiteHanko — A human approval stamp for the knowledge your AI may cite.
+加判役（Kahanyaku）— AIが起案し、人が加判する。
 AI向けナレッジにdraft・review・approveを持ち込む、Git-style review queue。
 AIエージェント向け社内ナレッジを、承認・履歴・引用・信頼度つきで管理する OSS（MCP サーバ + CLI）。
 
 - 技術スタック: TypeScript / Node.js 20 or 22 LTS / ESM (NodeNext) / better-sqlite3 / @modelcontextprotocol/sdk v1 / commander / zod / vitest
 - コマンド: `npm run build`（tsc）、`npm test`（vitest, 全テスト）、`npx tsc --noEmit`（型検査）、`npm run smoke`（MCP stdio 実プロセス疎通）
-- CLI 実行: `node dist/cli/index.js <command>`（init / mcp / list / search / show / approve / reject / archive / history / export / import）
-- データディレクトリ解決: `--data-dir`（init/mcp のみ）> env `CITEHANKO_HOME` > `./.citehanko`
+- CLI 実行: `node dist/cli/index.js <command>`（init / mcp / list / search / show / approve / reject / archive / history / export / import / audit）
+- データディレクトリ解決: `--data-dir`（init/mcp のみ）> env `KAHANYAKU_HOME` > `./.kahanyaku`
 - 構成: `src/core/`（サービス層・正）→ `src/cli/` と `src/mcp/` は薄い操作面。安全境界は operation で切る（AI は提案まで、承認は人間 CLI のみ）
 - 仕様の正本: `docs/spec.md`・`docs/overall-design.md`、実装詳細は `docs/detailed-design.md`、意思決定ログは `docs/wall-discussion.md`
 
