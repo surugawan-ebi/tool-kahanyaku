@@ -7,7 +7,7 @@
 - 仕様の正本は`docs/spec.md`と`docs/overall-design.md`、実装詳細は`docs/detailed-design.md`、意思決定ログは`docs/wall-discussion.md`とする。挙動変更時は該当文書との整合を確認する。
 - SQLiteがruntime stateの正本であり、Markdownはimport/export用snapshotとして扱う。verified noteを直接上書きせず、更新はproposal経由にする。
 - MCPにはapprove・reject・archive・auditを公開しない。ただしこれはworkflow上の操作境界であり、認証・OS sandbox・tamper-proof auditを提供するとは表現しない。
-- Node.js 20または22 LTSを対象にし、handoff前に`npm run typecheck`、`npm test`、`npm run demo`、`npm run smoke`、`npm pack --dry-run`、`git diff --check`を変更範囲に応じて実行する。
+- Node.js 20または22 LTSを対象にし、handoff前に`npm run typecheck`、`npm test`、`npm run demo`、`npm run smoke`、`npm run smoke:http`、`npm pack --dry-run`、`git diff --check`を変更範囲に応じて実行する。
 
 <!-- BEGIN managed:initialize-managed-repo:agents -->
 <!-- version: 1; body-sha256: 0dc23d0720f8d2b8626e7158e50333e50b3d61626ac465c36e091d56463986c9 -->

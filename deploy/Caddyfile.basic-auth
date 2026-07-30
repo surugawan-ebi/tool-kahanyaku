@@ -1,0 +1,9 @@
+{$KAHANYAKU_DOMAIN} {
+	basic_auth {
+		{$KAHANYAKU_BASIC_USER} {$KAHANYAKU_CADDY_SECRET}
+	}
+
+	reverse_proxy kahanyaku:3000 {
+		header_up -Authorization
+	}
+}
