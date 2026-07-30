@@ -1,9 +1,9 @@
 ---
 title: "料金FAQ"
 # NOTE(デモ用): このファイルは意図的に source を省略し、summary を20字未満にしています。
-# `agentpress import examples/support-vault` で取り込んだ後、この note には
+# `kahanyaku import examples/support-vault` で取り込んだ後、この note には
 # missing_source / summary_too_short の policy warning が付き、
-# `agentpress list --pending` の ⚠ フラグや `agentpress show <id>` の
+# `kahanyaku list --pending` の ⚠ フラグや `kahanyaku show <id>` の
 # policy warnings 欄でレビュー時に見えることを確認するためのサンプルです。
 # 詳しくは examples/README.md を参照してください。
 summary: "料金プランのFAQ"

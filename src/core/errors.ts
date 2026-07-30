@@ -20,9 +20,9 @@ export const ERROR_CODES = [
   "policy_violation",
 ] as const;
 
-export type AgentPressErrorCode = (typeof ERROR_CODES)[number];
+export type KahanyakuErrorCode = (typeof ERROR_CODES)[number];
 
-export interface AgentPressErrorOptions {
+export interface KahanyakuErrorOptions {
   details?: Record<string, unknown>;
   retryable?: boolean;
   suggested_action?: string;
@@ -30,22 +30,22 @@ export interface AgentPressErrorOptions {
 }
 
 /** Uniform error shape surfaced verbatim by MCP tools and formatted for CLI output. */
-export class AgentPressError extends Error {
-  readonly code: AgentPressErrorCode;
+export class KahanyakuError extends Error {
+  readonly code: KahanyakuErrorCode;
   readonly details?: Record<string, unknown>;
   readonly retryable: boolean;
   readonly suggested_action?: string;
 
-  constructor(code: AgentPressErrorCode, message: string, options: AgentPressErrorOptions = {}) {
+  constructor(code: KahanyakuErrorCode, message: string, options: KahanyakuErrorOptions = {}) {
     super(message, options.cause !== undefined ? { cause: options.cause } : undefined);
-    this.name = "AgentPressError";
+    this.name = "KahanyakuError";
     this.code = code;
     this.details = options.details;
     this.retryable = options.retryable ?? false;
     this.suggested_action = options.suggested_action;
   }
 
-  toJSON(): { code: AgentPressErrorCode; message: string; details?: Record<string, unknown>; retryable: boolean; suggested_action?: string } {
+  toJSON(): { code: KahanyakuErrorCode; message: string; details?: Record<string, unknown>; retryable: boolean; suggested_action?: string } {
     return {
       code: this.code,
       message: this.message,
@@ -57,7 +57,7 @@ export class AgentPressError extends Error {
 }
 
 /**
- * Parses input against a zod schema, converting ZodError into the uniform AgentPressError
+ * Parses input against a zod schema, converting ZodError into the uniform KahanyakuError
  * shape. Constrained as ZodType<Output, any, any> (not ZodSchema<T>, which pins Input = Output)
  * so schemas with `.default()`/`.nullish()` fields infer the post-parse Output type correctly.
  */
@@ -65,7 +65,7 @@ export function parseOrThrow<Output>(schema: ZodType<Output, any, any>, input: u
   const result = schema.safeParse(input);
   if (!result.success) {
     const message = result.error.issues.map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`).join("; ");
-    throw new AgentPressError("invalid_input", message, { details: { issues: result.error.issues } });
+    throw new KahanyakuError("invalid_input", message, { details: { issues: result.error.issues } });
   }
   return result.data;
 }

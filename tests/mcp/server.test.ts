@@ -64,7 +64,7 @@ describe("buildMcpServer", () => {
     );
   });
 
-  it("surfaces an AgentPressError JSON payload with isError:true for a not_found id", async () => {
+  it("surfaces a KahanyakuError JSON payload with isError:true for a not_found id", async () => {
     const ctx = makeTestContext();
     const { client } = await connectedClient(ctx);
     // Fetch tools/list first (as any well-behaved client does, e.g. Claude Desktop) so the

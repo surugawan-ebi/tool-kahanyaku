@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { AppContext } from "../../core/context.js";
-import { AgentPressError, parseOrThrow } from "../../core/errors.js";
+import { KahanyakuError, parseOrThrow } from "../../core/errors.js";
 import { createHistoryService } from "../../core/history.js";
 import { getNoteRow } from "../../core/noteRows.js";
 import { okResult, errorResult, type ToolResult } from "../toolResponse.js";
@@ -38,7 +38,7 @@ function requireEntityExists(ctx: AppContext, id: string): void {
     const row = ctx.db.prepare("SELECT 1 FROM update_proposals WHERE id = ?").get(id);
     if (row) return;
   }
-  throw new AgentPressError("not_found", `${id} was not found`, { details: { id } });
+  throw new KahanyakuError("not_found", `${id} was not found`, { details: { id } });
 }
 
 export function getNoteHistoryTool(ctx: AppContext, rawInput: unknown): ToolResult {
@@ -70,7 +70,7 @@ export function getNoteHistoryTool(ctx: AppContext, rawInput: unknown): ToolResu
 }
 
 const DESCRIPTION = `note_またはproposal_のIDについて、監査・文脈把握用の変更履歴を返す。直近のイベントからlimit件(デフォルト20)を新しい順に返す。
-each eventにはevent_type/actor/role/scope/reason/created_atのみを含み、before/afterのスナップショットは含まない(サイズが大きいため)。差分やスナップショットの詳細が必要な場合はCLIの\`agentpress history <id>\`を使うこと。
+each eventにはevent_type/actor/role/scope/reason/created_atのみを含み、before/afterのスナップショットは含まない(サイズが大きいため)。差分やスナップショットの詳細が必要な場合はCLIの\`kahanyaku history <id>\`を使うこと。
 これは「誰が・いつ・なぜ」を把握するための監査ツールであり、noteの現在の正式な内容を得たい場合はget_noteを使うこと(このツールの出力自体を回答の根拠として引用しないこと)。`;
 
 export function registerGetNoteHistoryTool(server: McpServer, ctx: AppContext): void {

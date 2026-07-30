@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { AppContext } from "../core/context.js";
-import { AgentPressError } from "../core/errors.js";
+import { KahanyakuError } from "../core/errors.js";
 
 /** An in_progress reservation older than this is treated as abandoned (e.g. the process
  *  that made it was killed mid-write) and can be taken over by a new attempt. */
@@ -70,7 +70,7 @@ export function withIdempotency<T>(
 
       if (!isAbandoned) {
         if (existing.request_hash !== hash) {
-          throw new AgentPressError(
+          throw new KahanyakuError(
             "invalid_input",
             `idempotency_key ${idempotencyKey} was already used with different input for ${tool}`,
             {
@@ -82,7 +82,7 @@ export function withIdempotency<T>(
         if (existing.status === "completed") {
           return "completed";
         }
-        throw new AgentPressError(
+        throw new KahanyakuError(
           "in_progress",
           `a request with idempotency_key ${idempotencyKey} is already in progress for ${tool}`,
           {

@@ -33,7 +33,7 @@ export const GetReviewItemOutput = z.object({
   diff: z.string().optional(),
   // proposal-only: not in spec.md's original get_review_item example, but a strict superset
   // (more information, same usable_as_context:false guard) is harmless and matches what
-  // `agentpress show <proposal_id>` already surfaces on the CLI side.
+  // `kahanyaku show <proposal_id>` already surfaces on the CLI side.
   reason: z.string().optional(),
   source: z.array(SourceInput).optional(),
   proposed_by: z.string().optional(),

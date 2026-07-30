@@ -34,7 +34,7 @@ export const ContextPackConfig = z.object({
 });
 export type ContextPackConfig = z.infer<typeof ContextPackConfig>;
 
-export const AgentPressConfigSchema = z.object({
+export const KahanyakuConfigSchema = z.object({
   default_search_status: z.literal("verified").default("verified"),
   strict_stale_filter: z.boolean().default(false),
   default_review_interval_days: z.number().int().positive().default(90),
@@ -62,27 +62,27 @@ export const AgentPressConfigSchema = z.object({
   // note_body_max_chars (an authoring-time policy_warning threshold, not a wire-size cap).
   max_body_chars: z.number().int().positive().default(8000),
 });
-export type AgentPressConfig = z.infer<typeof AgentPressConfigSchema>;
+export type KahanyakuConfig = z.infer<typeof KahanyakuConfigSchema>;
 
-export const DEFAULT_CONFIG: AgentPressConfig = AgentPressConfigSchema.parse({});
+export const DEFAULT_CONFIG: KahanyakuConfig = KahanyakuConfigSchema.parse({});
 
-export const CONFIG_FILE_NAME = "agentpress.config.yaml";
+export const CONFIG_FILE_NAME = "kahanyaku.config.yaml";
 
 /**
- * Loads `<dataDir>/agentpress.config.yaml`. Missing file, or a file with only
+ * Loads `<dataDir>/kahanyaku.config.yaml`. Missing file, or a file with only
  * some keys set, falls back to DEFAULT_CONFIG for the rest.
  */
-export function loadConfig(dataDir: string): AgentPressConfig {
+export function loadConfig(dataDir: string): KahanyakuConfig {
   const configPath = path.join(dataDir, CONFIG_FILE_NAME);
   if (!fs.existsSync(configPath)) {
     return DEFAULT_CONFIG;
   }
   const raw = fs.readFileSync(configPath, "utf-8");
   const parsed = parseYaml(raw) ?? {};
-  return AgentPressConfigSchema.parse(parsed);
+  return KahanyakuConfigSchema.parse(parsed);
 }
 
-/** Renders the default config as YAML text for `agentpress init` to write out. */
+/** Renders the default config as YAML text for `kahanyaku init` to write out. */
 export function renderDefaultConfigYaml(): string {
   return `default_search_status: verified
 strict_stale_filter: false
@@ -136,6 +136,6 @@ function stableStringify(value: unknown): string {
  * archive history events so an audit export can answer "which policy was this decided
  * under" without re-deriving it from the config file's git history.
  */
-export function computeConfigHash(config: AgentPressConfig): string {
+export function computeConfigHash(config: KahanyakuConfig): string {
   return createHash("sha256").update(stableStringify(config)).digest("hex");
 }

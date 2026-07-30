@@ -8,7 +8,7 @@ import { CitationSchema } from "../schemas.js";
 import { okResult, errorResult, type ToolResult } from "../toolResponse.js";
 
 export const GetContextPackInput = z.object({
-  name: z.string().min(1).describe("agentpress.config.yamlのcontext_packsに定義されたpack名。"),
+  name: z.string().min(1).describe("kahanyaku.config.yamlのcontext_packsに定義されたpack名。"),
   include_body: z.boolean().optional().describe("trueの場合、各noteの本文を含める(デフォルトはメタデータのみ)。"),
   limit: z.number().int().positive().max(100).optional().describe("省略時はinclude_body:falseで50件、trueで20件。"),
   cursor: z.string().nullish().describe("前回のnext_cursorを渡すとその続きから返す。"),
@@ -82,7 +82,7 @@ export function getContextPackTool(ctx: AppContext, rawInput: unknown): ToolResu
   }
 }
 
-const DESCRIPTION = `[verified plane] agentpress.config.yamlのcontext_packsで定義された、verified noteの厳選済みセットを一括取得する。get_registry_overviewのcontext_packs[]で利用可能なpack名を確認できる。
+const DESCRIPTION = `[verified plane] kahanyaku.config.yamlのcontext_packsで定義された、verified noteの厳選済みセットを一括取得する。get_registry_overviewのcontext_packs[]で利用可能なpack名を確認できる。
 デフォルトはメタデータのみ(本文なし)。include_body:trueで本文も返すが、1件あたりmax_body_chars設定を超える本文は切り詰められbody_truncated:trueが付く。limitのデフォルトはinclude_body:falseで50件、trueで20件。結果がlimit件に達した場合はtruncated:trueとnext_cursorが付き、次回呼び出しのcursorに渡すと続きが取れる。
 excluded[]には、pack定義の条件に該当したがこの呼び出しでは配布されなかったnoteとその理由が入る: archived(archiveされたnoteは、note_idsで明示pinされていても絶対に配らない) / not_verified(pinされたnoteがdraft/rejectedだった) / stale_filtered(strict_stale_filter:trueでstale noteが除外された) / not_found(pinされたnote_idが存在しない)。
 strict_stale_filter:falseの場合、staleなnoteは含まれ、citationのstale:trueで示される。pack内にstale noteが1件以上あればwarningsに件数付きの注意文が入る。

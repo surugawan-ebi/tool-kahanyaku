@@ -21,7 +21,7 @@ if (!fs.existsSync(cliEntry)) {
   process.exit(1);
 }
 
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "agentpress-smoke-"));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-smoke-"));
 let step = "startup";
 let passed = 0;
 
@@ -29,7 +29,7 @@ let passed = 0;
 // must exist before the server is spawned below -- writing it later would have no effect
 // on the already-running process. Defines a context pack the get_context_pack step uses.
 fs.writeFileSync(
-  path.join(dataDir, "agentpress.config.yaml"),
+  path.join(dataDir, "kahanyaku.config.yaml"),
   `context_packs:
   smoke_pack:
     description: "Smoke test pack"
@@ -57,7 +57,7 @@ async function main() {
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [cliEntry, "mcp", "--data-dir", dataDir],
-    env: { ...process.env, AGENTPRESS_ACTOR: "agent:smoke-test" },
+    env: { ...process.env, KAHANYAKU_ACTOR: "agent:smoke-test" },
     stderr: "pipe",
   });
 
@@ -67,7 +67,7 @@ async function main() {
     process.stderr.write(`[server stderr] ${chunk}`);
   });
 
-  const client = new Client({ name: "agentpress-smoke-test", version: "0.0.0" }, { capabilities: {} });
+  const client = new Client({ name: "kahanyaku-smoke-test", version: "0.0.0" }, { capabilities: {} });
 
   try {
     step = "connect";
@@ -166,8 +166,8 @@ async function main() {
     // only the human CLI approves), so drive this step through the real CLI binary against
     // the same data dir the MCP server has open, mirroring how a human reviewer would
     // approve a draft an agent created via MCP. --data-dir is init/mcp only (see CLAUDE.md /
-    // context.ts's resolveDataDir), so other commands are pointed at it via AGENTPRESS_HOME.
-    const cliEnv = { ...process.env, AGENTPRESS_HOME: dataDir };
+    // context.ts's resolveDataDir), so other commands are pointed at it via KAHANYAKU_HOME.
+    const cliEnv = { ...process.env, KAHANYAKU_HOME: dataDir };
     step = "approve the draft note via the CLI (human review step)";
     execFileSync(
       process.execPath,

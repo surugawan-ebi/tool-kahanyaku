@@ -1,6 +1,6 @@
 import type { AppContext } from "./context.js";
 import type { ContextPackConfig } from "../config/config.js";
-import { AgentPressError } from "./errors.js";
+import { KahanyakuError } from "./errors.js";
 import { getNoteRow, getTags, isStale, type NoteRow } from "./noteRows.js";
 import { buildCitation, type Citation } from "./citation.js";
 import type { Confidence, NoteStatus } from "../types/common.js";
@@ -176,12 +176,12 @@ export function createContextPackService(ctx: AppContext): ContextPackService {
       const pack = config.context_packs[name];
       if (!pack) {
         const available = Object.keys(config.context_packs);
-        throw new AgentPressError("not_found", `context pack "${name}" was not found`, {
+        throw new KahanyakuError("not_found", `context pack "${name}" was not found`, {
           details: { name },
           suggested_action:
             available.length > 0
               ? `available context packs: ${available.join(", ")}`
-              : "no context packs are configured; add one under context_packs in agentpress.config.yaml",
+              : "no context packs are configured; add one under context_packs in kahanyaku.config.yaml",
         });
       }
 

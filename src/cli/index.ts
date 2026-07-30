@@ -24,8 +24,8 @@ import { registerAuditCommand } from "./commands/audit.js";
 export function buildProgram(): Command {
   const program = new Command();
   program
-    .name("agentpress")
-    .description("A Git-style review queue for the knowledge your AI agents are allowed to cite.")
+    .name("kahanyaku")
+    .description("AI proposes. Humans countersign. Human-governed knowledge review for AI agents.")
     .exitOverride();
 
   registerInitCommand(program);

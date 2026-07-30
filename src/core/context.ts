@@ -1,12 +1,12 @@
 import path from "node:path";
 import os from "node:os";
-import { openDb, type AgentPressDb } from "../db/client.js";
-import { loadConfig, type AgentPressConfig } from "../config/config.js";
+import { openDb, type KahanyakuDb } from "../db/client.js";
+import { loadConfig, type KahanyakuConfig } from "../config/config.js";
 import { Role, type Role as RoleType } from "../types/common.js";
 
 export interface AppContext {
-  db: AgentPressDb;
-  config: AgentPressConfig;
+  db: KahanyakuDb;
+  config: KahanyakuConfig;
   dataDir: string;
   actor: string;
   role: RoleType;
@@ -20,20 +20,20 @@ export interface CreateContextOptions {
   defaultRole?: RoleType;
 }
 
-/** --data-dir > env AGENTPRESS_HOME > ./.agentpress */
+/** --data-dir > env KAHANYAKU_HOME > ./.kahanyaku */
 export function resolveDataDir(explicit?: string): string {
-  return path.resolve(explicit ?? process.env.AGENTPRESS_HOME ?? "./.agentpress");
+  return path.resolve(explicit ?? process.env.KAHANYAKU_HOME ?? "./.kahanyaku");
 }
 
-/** --actor > env AGENTPRESS_ACTOR > config.default_actor > OS user */
-export function resolveActor(explicit: string | undefined, config: AgentPressConfig): string {
-  return explicit ?? process.env.AGENTPRESS_ACTOR ?? config.default_actor ?? os.userInfo().username;
+/** --actor > env KAHANYAKU_ACTOR > config.default_actor > OS user */
+export function resolveActor(explicit: string | undefined, config: KahanyakuConfig): string {
+  return explicit ?? process.env.KAHANYAKU_ACTOR ?? config.default_actor ?? os.userInfo().username;
 }
 
-/** --role > env AGENTPRESS_ROLE > defaultRole ("contributor" unless caller overrides) */
+/** --role > env KAHANYAKU_ROLE > defaultRole ("contributor" unless caller overrides) */
 export function resolveRole(explicit: RoleType | undefined, defaultRole: RoleType = "contributor"): RoleType {
   if (explicit) return explicit;
-  const envRole = process.env.AGENTPRESS_ROLE;
+  const envRole = process.env.KAHANYAKU_ROLE;
   if (envRole) {
     const parsed = Role.safeParse(envRole);
     if (parsed.success) return parsed.data;

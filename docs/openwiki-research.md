@@ -1,7 +1,7 @@
 ---
 title: OpenWiki 調査メモ
 updated: 2026-07-09
-summary: LangChain OpenWikiを関連OSSとして読み、AgentPressとの違いと取り込み方を整理する
+summary: LangChain OpenWikiを関連OSSとして読み、Kahanyakuとの違いと取り込み方を整理する
 ---
 
 # OpenWiki 調査メモ
@@ -37,8 +37,8 @@ GitHub ActionsやGitLab CIのworkflowを追加し、documentation updateをPRま
 
 ## Why It Matters
 
-OpenWikiは、AgentPressの初期構想にかなり近い「AI agent向けドキュメント」をOSSとして具体化している。  
-特に、codebaseの理解をagentに渡すという用途では、AgentPressが自前で競合機能を作る必要は薄い。
+OpenWikiは、加判役の初期構想にかなり近い「AI agent向けドキュメント」をOSSとして具体化している。<br>
+特に、codebaseの理解をagentに渡すという用途では、加判役が自前で競合機能を作る必要は薄い。
 
 OpenWikiが押さえている価値:
 
@@ -47,28 +47,28 @@ OpenWikiが押さえている価値:
 - AGENTS.md/CLAUDE.mdを通じてagentに参照させる
 - PR/MRとして更新をレビューできる
 
-## Difference from AgentPress
+## Difference from Kahanyaku
 
 OpenWikiは「codebase documentation generator/maintainer」。  
-AgentPressは「verified context governance workflow」。
+加判役は「verified context governance workflow」。
 
 主な違い:
 
 - OpenWikiは対象が主にcodebase
-- AgentPressは社内ナレッジ全般、SOP、FAQ、policy、runbook、製品知識まで扱う
+- 加判役は社内ナレッジ全般、SOP、FAQ、policy、runbook、製品知識まで扱う
 - OpenWikiはdocs生成と更新が中心
-- AgentPressはdraft/proposal/review/approve/status/history/citation/confidenceが中心
+- 加判役はdraft/proposal/review/approve/status/history/citation/confidenceが中心
 - OpenWikiはGit PR/MRのreview workflowに乗る
-- AgentPressはMCPとCLIでAI agent向けcontext accessと承認キューを持つ
+- 加判役はMCPとCLIでAI agent向けcontext accessと承認キューを持つ
 - OpenWikiはagentに読ませるドキュメントを作る
-- AgentPressはagentが読んでよいverified context subsetを統制する
+- 加判役はagentが読んでよいverified context subsetを統制する
 
-## How AgentPress Should React
+## How Kahanyaku Should React
 
 OpenWikiとは競合しきらない。  
-むしろ、OpenWikiが生成したcodebase docsをAgentPressへimportし、チームのreviewerがverified contextとして承認する流れが自然。
+むしろ、OpenWikiが生成したcodebase docsを加判役へimportし、チームのreviewerがverified contextとして承認する流れが自然。
 
-AgentPressのMVPでは、codebase docs generatorを作らない。  
+加判役のMVPでは、codebase docs generatorを作らない。<br>
 その代わり、以下を明確にする。
 
 - generated docsはsourceの一種
@@ -83,7 +83,7 @@ AgentPressのMVPでは、codebase docs generatorを作らない。
 
 ```text
 OpenWiki turns codebases into agent-readable documentation.
-AgentPress turns organizational knowledge into reviewer-approved context for AI agents.
+Kahanyaku turns organizational knowledge into reviewer-approved context for AI agents.
 ```
 
 OpenWikiが強い領域:
@@ -93,7 +93,7 @@ OpenWikiが強い領域:
 - CI-driven docs refresh
 - AGENTS.md/CLAUDE.md integration
 
-AgentPressが狙う領域:
+加判役が狙う領域:
 
 - verified context registry
 - human approval boundary
@@ -104,8 +104,8 @@ AgentPressが狙う領域:
 
 ## MVP Implications
 
-- AgentPress MVPにcode analysis/generation機能を入れない
+- Kahanyaku MVPにcode analysis/generation機能を入れない
 - READMEの比較対象にOpenWikiを入れる
 - Markdown import/exportはOpenWiki生成docsを受けられる形にする
-- future connectorとして`agentpress import openwiki/`を検討する
-- codebase knowledgeはOpenWikiで生成し、AgentPressで承認、配布する棲み分けを推奨する
+- future connectorとして`kahanyaku import openwiki/`を検討する
+- codebase knowledgeはOpenWikiで生成し、Kahanyakuで承認、配布する棲み分けを推奨する

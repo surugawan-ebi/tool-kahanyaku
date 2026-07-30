@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createPolicyService, computeReviewDueAt } from "../src/core/policy.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { KahanyakuError } from "../src/core/errors.js";
 import { makeTestContext } from "./helpers.js";
 
 const goodBody = "# 概要\n本文です。\n\n# 正本回答\nこれが正本回答です。";
@@ -325,12 +325,12 @@ describe("assertApprovalAuthorized", () => {
         config: { scope_reviewers: "enforce", scopes: { support: { description: "", owners: [], reviewers: ["someone-else"] } } },
       }),
     );
-    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: "support" })).toThrow(AgentPressError);
+    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: "support" })).toThrow(KahanyakuError);
     try {
       policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: "support" });
       expect.unreachable();
     } catch (err) {
-      expect((err as AgentPressError).code).toBe("policy_violation");
+      expect((err as KahanyakuError).code).toBe("policy_violation");
     }
   });
 
@@ -363,25 +363,25 @@ describe("assertApprovalAuthorized", () => {
       makeTestContext({ actor: "reviewer:human", role: "reviewer", config: { scope_reviewers: "enforce" } }),
     );
     expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: "unconfigured-scope" })).toThrow(
-      AgentPressError,
+      KahanyakuError,
     );
   });
 
   it("scope_reviewers:enforce rejects a non-maintainer for a note with no scope at all", () => {
     const policy = createPolicyService(makeTestContext({ actor: "reviewer:human", role: "reviewer", config: { scope_reviewers: "enforce" } }));
-    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: null })).toThrow(AgentPressError);
+    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: null })).toThrow(KahanyakuError);
   });
 
   it("reviewer_separation:enforce rejects the author approving their own change, even as a maintainer (no bypass)", () => {
     const policy = createPolicyService(
       makeTestContext({ actor: "agent:codex", role: "maintainer", config: { reviewer_separation: "enforce" } }),
     );
-    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: null })).toThrow(AgentPressError);
+    expect(() => policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: null })).toThrow(KahanyakuError);
     try {
       policy.assertApprovalAuthorized({ authorActor: "agent:codex", scope: null });
       expect.unreachable();
     } catch (err) {
-      expect((err as AgentPressError).code).toBe("policy_violation");
+      expect((err as KahanyakuError).code).toBe("policy_violation");
     }
   });
 

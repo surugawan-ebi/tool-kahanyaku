@@ -1,16 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { createReviewService } from "../src/core/reviews.js";
 import { createNoteService } from "../src/core/notes.js";
-import { AgentPressError } from "../src/core/errors.js";
+import { KahanyakuError } from "../src/core/errors.js";
 import { computeConfigHash } from "../src/config/config.js";
 import { makeTestContext, insertNoteFixture } from "./helpers.js";
 import type { AppContext } from "../src/core/context.js";
 
-function captureError(fn: () => unknown): AgentPressError {
+function captureError(fn: () => unknown): KahanyakuError {
   try {
     fn();
   } catch (err) {
-    return err as AgentPressError;
+    return err as KahanyakuError;
   }
   throw new Error("expected function to throw");
 }

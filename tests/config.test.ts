@@ -11,15 +11,15 @@ describe("loadConfig", () => {
   });
 
   it("returns defaults when no config file exists", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agentpress-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-"));
     tmpDirs.push(dir);
     expect(loadConfig(dir)).toEqual(DEFAULT_CONFIG);
   });
 
   it("merges a partial config file over the defaults", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agentpress-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-"));
     tmpDirs.push(dir);
-    fs.writeFileSync(path.join(dir, "agentpress.config.yaml"), "strict_stale_filter: true\nnote_body_max_chars: 100\n");
+    fs.writeFileSync(path.join(dir, "kahanyaku.config.yaml"), "strict_stale_filter: true\nnote_body_max_chars: 100\n");
     const config = loadConfig(dir);
     expect(config.strict_stale_filter).toBe(true);
     expect(config.note_body_max_chars).toBe(100);
@@ -27,9 +27,9 @@ describe("loadConfig", () => {
   });
 
   it("renderDefaultConfigYaml produces a file loadConfig can parse with the same scalar defaults", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agentpress-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "kahanyaku-"));
     tmpDirs.push(dir);
-    fs.writeFileSync(path.join(dir, "agentpress.config.yaml"), renderDefaultConfigYaml());
+    fs.writeFileSync(path.join(dir, "kahanyaku.config.yaml"), renderDefaultConfigYaml());
     const config = loadConfig(dir);
     // renderDefaultConfigYaml seeds an example "support" scope (per detailed-design's
     // sample config), so scopes differs from the zero-config DEFAULT_CONFIG on purpose.

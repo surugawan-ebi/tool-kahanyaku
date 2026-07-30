@@ -3,19 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { runCli, setupTmpProject, writeSeedFile, readNoteIds } from "./helpers.js";
 
-describe("agentpress audit", () => {
+describe("kahanyaku audit", () => {
   let project: { dir: string; cleanup: () => void };
-  const originalActorEnv = process.env.AGENTPRESS_ACTOR;
+  const originalActorEnv = process.env.KAHANYAKU_ACTOR;
 
   beforeEach(() => {
     project = setupTmpProject();
-    process.env.AGENTPRESS_ACTOR = "agent:codex";
+    process.env.KAHANYAKU_ACTOR = "agent:codex";
   });
 
   afterEach(() => {
     project.cleanup();
-    if (originalActorEnv === undefined) delete process.env.AGENTPRESS_ACTOR;
-    else process.env.AGENTPRESS_ACTOR = originalActorEnv;
+    if (originalActorEnv === undefined) delete process.env.KAHANYAKU_ACTOR;
+    else process.env.KAHANYAKU_ACTOR = originalActorEnv;
   });
 
   async function seedApprovedNote(): Promise<string> {

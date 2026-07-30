@@ -189,7 +189,7 @@ export function renderImportSummary(summary: ImportSummary, scopeCounts: Map<str
       lines.push(`  ${scope}: ${count}`);
     }
     lines.push("");
-    lines.push("scope ごとに `agentpress list --pending --scope <scope>` でレビューしてください。");
+    lines.push("scope ごとに `kahanyaku list --pending --scope <scope>` でレビューしてください。");
   }
   if (summary.warnings.length > 0) {
     lines.push("");

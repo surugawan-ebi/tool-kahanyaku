@@ -1,6 +1,6 @@
 import type { AppContext } from "./context.js";
 import { newId } from "./ids.js";
-import { AgentPressError, parseOrThrow } from "./errors.js";
+import { KahanyakuError, parseOrThrow } from "./errors.js";
 import { createHistoryService } from "./history.js";
 import { createPolicyService } from "./policy.js";
 import { computeConfigHash } from "../config/config.js";
@@ -49,7 +49,7 @@ export function createNoteService(ctx: AppContext): NoteService {
   function requireNote(id: string): NoteRow {
     const row = getNoteRow(db, id);
     if (!row) {
-      throw new AgentPressError("not_found", `${id} was not found`, { details: { id } });
+      throw new KahanyakuError("not_found", `${id} was not found`, { details: { id } });
     }
     return row;
   }
@@ -59,7 +59,7 @@ export function createNoteService(ctx: AppContext): NoteService {
       const input = parseOrThrow(CreateDraftInput, rawInput);
 
       if (input.source.length === 0 && !input.reason) {
-        throw new AgentPressError(
+        throw new KahanyakuError(
           "invalid_input",
           "either source[] or reason is required to create a draft",
           { suggested_action: "provide at least one source or a reason for this note" },
@@ -139,19 +139,19 @@ export function createNoteService(ctx: AppContext): NoteService {
       const before = requireNote(input.id);
 
       if (before.status === "archived") {
-        throw new AgentPressError("archived_target", `${input.id} is archived and cannot be edited`, {
+        throw new KahanyakuError("archived_target", `${input.id} is archived and cannot be edited`, {
           details: { status: before.status },
         });
       }
       if (before.status === "verified") {
-        throw new AgentPressError(
+        throw new KahanyakuError(
           "invalid_input",
           `${input.id} is verified; use propose_note_update instead`,
           { details: { status: before.status }, suggested_action: "use propose_note_update" },
         );
       }
       if (before.created_by !== actor) {
-        throw new AgentPressError("not_draft_owner", `${actor} does not own draft ${input.id}`, {
+        throw new KahanyakuError("not_draft_owner", `${actor} does not own draft ${input.id}`, {
           details: { owner: before.created_by },
         });
       }
@@ -234,7 +234,7 @@ export function createNoteService(ctx: AppContext): NoteService {
     getVerifiedNote(id: string): NoteWithDetail {
       const row = requireNote(id);
       if (row.status !== "verified" && row.status !== "archived") {
-        throw new AgentPressError("not_verified", `${id} is ${row.status}, not verified.`, {
+        throw new KahanyakuError("not_verified", `${id} is ${row.status}, not verified.`, {
           details: { status: row.status },
           suggested_action: "use get_review_item",
         });
@@ -250,10 +250,10 @@ export function createNoteService(ctx: AppContext): NoteService {
     archiveNote(id: string, reason: string): Note {
       const before = requireNote(id);
       if (before.status === "archived") {
-        throw new AgentPressError("archived_target", `${id} is already archived`);
+        throw new KahanyakuError("archived_target", `${id} is already archived`);
       }
       if (before.status !== "verified") {
-        throw new AgentPressError("invalid_input", `${id} must be verified before it can be archived`, {
+        throw new KahanyakuError("invalid_input", `${id} must be verified before it can be archived`, {
           details: { status: before.status },
         });
       }
