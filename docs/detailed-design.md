@@ -1,6 +1,6 @@
 ---
 title: 加判役（Kahanyaku）詳細設計
-updated: 2026-07-10
+updated: 2026-07-30
 summary: MVP実装のための技術選定、DBスキーマ、サービスAPI、MCP/CLI設計、テスト計画、実装タスク分割
 ---
 
@@ -14,7 +14,8 @@ summary: MVP実装のための技術選定、DBスキーマ、サービスAPI、
 |---|---|---|
 | 言語/ランタイム | TypeScript 5.x / Node.js >= 20 / ESM | MCP SDK が ESM 前提。`module: NodeNext` |
 | SQLite | better-sqlite3 | 同期 API で service 層が単純になる。WAL・transaction・prebuilt binary が安定 |
-| MCP | @modelcontextprotocol/sdk **v1 系に pin**（`^1`） | v2 は beta/split package のため使わない。import は `@modelcontextprotocol/sdk/server/mcp.js` / `@modelcontextprotocol/sdk/server/stdio.js` に固定 |
+| MCP | @modelcontextprotocol/sdk **v1.30 系**（`^1.30`） | 既存stdio互換を維持しつつ、同SDKのstateless Streamable HTTPを使う。2026-07-28 protocol revisionへのv2移行は別変更として扱う |
+| HTTP adapter | Express 5 / SDK `createMcpExpressApp` | JSON body処理とHost header validationを公式SDK adapterへ寄せる |
 | CLI | commander | 標準的。subcommand 構成が素直 |
 | validation | zod | tool input/output と config の検証を共通化 |
 | frontmatter | gray-matter | Markdown + YAML frontmatter の parse/serialize |
@@ -34,10 +35,11 @@ tool-kahanyaku/（このrepo直下）
     index.ts                  # ライブラリexport（core再export）
     cli/
       index.ts                # commander エントリ
-      commands/{init,mcp,list,search,show,approve,reject,archive,history,export,import,audit}.ts
+      commands/{init,mcp,mcpHttp,list,search,show,approve,reject,archive,history,export,import,audit}.ts
       render.ts               # テーブル/diff等の表示ヘルパ
     mcp/
       server.ts               # McpServer 組み立て + stdio 起動
+      httpServer.ts           # stateless Streamable HTTP / Host・Origin検証
       tools/{getRegistryOverview,searchNotes,getNote,getContextPack,createNoteDraft,updateDraft,proposeNoteUpdate,recommendArchive,listReviewItems,getReviewItem,getNoteHistory}.ts
       idempotency.ts          # mutating tool 共通ラッパ
     core/
@@ -383,12 +385,16 @@ changedFields(input, note): string[]
 - search_notes の 0 件時は仕様どおり `no_results: true` / `guidance` / `suggested_next_tools` / `searched_statuses`（FTS→LIKEフォールバック適用後の最終結果に対して判定）
 - citation は `{label, note_id, version, updated_at, review_due_at, stale, confidence, status, scope}` を共通ヘルパで生成
 - `kahanyaku mcp` コマンドが `StdioServerTransport` で起動。stdout は MCP protocol 専用、ログは stderr
+- `kahanyaku mcp-http`はrequestごとにfresh `McpServer` + `StreamableHTTPServerTransport`を作り、`sessionIdGenerator: undefined` / `enableJsonResponse: true`で`POST /mcp`を処理する。GET/DELETEは405。server push、resumption、legacy SSEは提供しない
+- `mcp-http`は既定`127.0.0.1:3000`。non-loopback bindは`allowedHosts`必須、Originなしのnative clientは許可し、Originありはexact allowlist方式で拒否/許可する
+- HTTP processは1つの`AppContext`/SQLite/actorを共有する。認証・TLS・rate limit・principal-to-actor mappingは外部gatewayの責務で、raw client headerをactorとして信用しない
 
 ## CLI 設計
 
 ```text
 kahanyaku init [--data-dir <dir>]
 kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
+kahanyaku mcp-http [--actor <actor>] [--data-dir <dir>] [--host <host>] [--port <port>] [--allowed-host <hostname>]... [--allowed-origin <origin>]...
 kahanyaku list [--pending] [--scope <s>] [--status <st>]
 kahanyaku search <query> [--include-archived]
 kahanyaku show <note_id|proposal_id>
@@ -442,9 +448,10 @@ frontmatter は spec.md の Knowledge Note 例に従う（id, slug, title, type,
 5. **Phase 4**: examples/support-vault + README + E2E 検証（実 CLI 実行 + MCP stdio 疎通）+ 完了条件チェック
 6. **Phase 2 機能追加**（初期MVP完了後）: migration 002（`notes_fts` + トリガー）+ `Fts5SearchEngine` + `search_engine`設定 + `recommend_archive`（reviews.ts / MCP tool / CLI表示）+ `get_note_history`（MCP tool）+ MCP 8→10 tools + docs/README更新 + version 0.2.0
 7. **Team Workflow Pack**（v0.2.0完了後）: `contextPacks.ts` + `get_context_pack`（MCP tool）+ `get_registry_overview`のcontext_packs[] + scope_reviewers/reviewer_separationのenforce実装（policy.ts/reviews.ts） + `policy_violation`エラーコード + `config_hash`のhistory記録 + `kahanyaku audit`（CLI） + `history.queryEvents` + MCP 10→11 tools + docs/README更新 + version 0.3.0
+8. **Self-hosted Remote MCP**: stateless Streamable HTTP、Host/Origin validation、実process smoke test、Docker/Caddy導入例、fixed service actor制約を追加 + version 0.4.0
 
 Phase 1 で全依存を package.json に入れる（後続 phase は package.json を触らない）。
 
 ## 完了条件
 
-spec.md の Completion Criteria に従う: `npm install` / `npm run build` / `npm test` が通る、`kahanyaku init` で初期化できる、`kahanyaku mcp` で MCP サーバが起動する、11 tools が使える、CLI で検索・表示・承認・却下・archive・audit ができる、Markdown export/importができる、README が書かれている、example vault が同梱されている。
+spec.md の Completion Criteria に従う: `npm install` / `npm run build` / `npm test` が通る、`kahanyaku init` で初期化できる、`kahanyaku mcp`と`kahanyaku mcp-http`で MCP サーバが起動する、11 tools が使える、CLI で検索・表示・承認・却下・archive・audit ができる、Markdown export/importができる、README が書かれている、example vault が同梱されている。

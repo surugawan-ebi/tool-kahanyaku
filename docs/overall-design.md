@@ -1,6 +1,6 @@
 ---
 title: 加判役（Kahanyaku）全体設計
-updated: 2026-07-10
+updated: 2026-07-30
 summary: 加判役をOSSのVerified Context Layerとして実装するための全体アーキテクチャ、データモデル、ワークフロー設計
 ---
 
@@ -13,7 +13,7 @@ summary: 加判役をOSSのVerified Context Layerとして実装するための�
 
 最初の実装はlocal-firstなOSS coreに絞る。
 
-- local MCP server
+- local stdio MCP / opt-in self-hosted Streamable HTTP MCP
 - CLI
 - SQLite
 - Markdown import/export
@@ -101,7 +101,7 @@ MCP serverとCLIは同じcore servicesを使う。
 ### MCP Server
 
 AI clientから呼ばれる入口。  
-MVPではstdio MCP serverで十分。
+local clientにはstdio MCP server、複数端末からのself-host利用にはopt-inのstateless Streamable HTTP MCP serverを使う。どちらも同じ11 toolsとcore servicesを共有する。
 
 公開するtoolsは3つのplaneに分ける。
 
@@ -621,8 +621,17 @@ OSS repoとして実装する場合、デフォルトではカレントディレ
 kahanyaku mcp
 ```
 
-MCP serverを起動する。  
-MVPではstdio transportのみ。debug用HTTPはMVP外にし、将来入れる場合もopt-inかつlocalhost限定にする。
+local client向けのstdio MCP serverを起動する。
+
+### mcp-http
+
+```bash
+kahanyaku mcp-http --host 127.0.0.1 --port 3000
+```
+
+remote利用向けのstateless Streamable HTTP serverを起動する。endpointは`POST /mcp`、health checkは`GET /healthz`。既定はloopback bindで、non-loopbackでは`--allowed-host`を必須とする。`Origin` headerは`--allowed-origin`のexact allowlist以外を拒否する。
+
+本体は認証、TLS、CORS、rate limitを提供しない。公開時はoperatorがreverse proxy、VPN、IP allowlist、OAuth等を選択する。共有endpointでは全clientが同じprocess actorになるため、個人別attributionが必要な環境ではidentity-aware gatewayまたはinstance分離を別途設計する。
 
 ### review
 
@@ -931,6 +940,7 @@ Warning: created_by and reviewed_by are the same actor.
 
 actorはMCP toolの入力では受け取らない。サーバ起動時の設定（env、config、起動引数）で固定する。  
 stdio transportではMCP clientごとにサーバprocessが起動するため、process単位のactor設定で複数agentを識別できる。tool引数でactorを渡せる設計にすると、AIが任意のactorを名乗って履歴を偽装できてしまうため避ける。
+Streamable HTTP transportでは1 processを複数clientが共有するため、全requestを同じservice actorとして記録する。Basic username、Bearer token、client指定headerをactorへ暗黙変換しない。
 
 ### Idempotency
 
@@ -1046,7 +1056,7 @@ tool-kahanyaku/
 - config形式: **YAML**（`kahanyaku.config.yaml`）にする。zodで厳格にvalidateする
 - ID方式: **prefix + ULID**にする（`note_01...`、`proposal_01...`、`hist_01...`）。型が分かり、時系列ソートもできる
 - diff形式: **unified diff文字列**で十分とする。proposed fieldsとnote snapshotが正本で、diffはそこから生成する派生データ。レスポンスには`changed_fields`も含める
-- `kahanyaku dev`は**`kahanyaku mcp`**にリネームする。MVPはstdioのみとし、debug用HTTPはMVP外にする。将来入れる場合もopt-inかつlocalhost限定にする
+- `kahanyaku dev`は**`kahanyaku mcp`**にリネームする。当初はstdioのみとしたが、2026-07-30にdebug用途とは分離したopt-inのself-hosted `kahanyaku mcp-http`を追加した。既定loopbackと外部access controlの責務分離は維持する
 - MCP toolで`list_pending_reviews`をAIに出す必要があるかは、**`list_review_items`への置き換え**で決着した
 - `review_due_at`切れの扱い: MVPでは検索結果の`stale: true`フラグのみとし、strict除外はconfigの`strict_stale_filter`（default false）として残す
 

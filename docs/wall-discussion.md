@@ -166,7 +166,7 @@ OSS coreとして始める。
 
 OSS coreに含めるもの:
 
-- local MCP server
+- local stdio MCP / opt-in self-hosted Streamable HTTP MCP
 - CLI
 - SQLite storage
 - Markdown import/export
@@ -616,3 +616,17 @@ Team Workflow Packの主眼は「複数人・複数scopeでの運用を安全に
 理由:
 
 `加判役`は、重要な文書や意思決定に責任を持って加判する人間側の役割を表す。AIがdraftやproposalを起案し、人間だけが正式な根拠として承認する本製品の操作境界と一致する。名称に`AI`を冠すると「AI自身が加判役になる」と誤読されるため採用しない。説明文でもAIを承認者・加判役として扱わず、製品は人間のレビュー、承認、履歴管理を支える仕組みとして表現する。
+
+## 17. Self-hosted Streamable HTTPをopt-inで追加（2026-07-30）
+
+判断:
+
+local stdioに加えて`kahanyaku mcp-http`を追加する。既存11 toolsと「AIは起案、人がCLIで加判する」operation境界は変えず、requestごとにfresh server/transportを作るstateless JSON responseのStreamable HTTPとして実装する。既定bindは`127.0.0.1`、non-loopback bindはHost allowlistを必須とし、browser Originはexact allowlist方式にする。
+
+Kahanyaku本体には認証、TLS、CORS、rate limitを内蔵しない。標準配置はoperator管理のHTTPS reverse proxyまたはprivate networkの背後とし、Bearer、Basic、IP allowlist、VPN、OAuth/OIDC等は環境に合わせて選ぶ。無認証例は外部のnetwork protectionが既にある場合だけの危険なopt-inとして分離する。
+
+remote HTTP processのactorは起動時に固定し、全clientを同じservice actorとして記録する。Basic usernameや任意headerを未検証のままactorへ変換しない。利用者別auditはidentity-aware gatewayとprincipal mappingを設計してから行う。
+
+理由:
+
+ローカル専用では記事から試用へ進む際の価値が小さく、複数端末から同じverified knowledgeを使う最小導線が必要だった。一方、企業ごとにidentity/network要件が異なるため、coreへ特定の認証方式を固定すると本来のknowledge review workflowより運用基盤の責務が大きくなる。transportと安全なdefault、具体的なdeployment例まではOSS側で提供し、組織固有のaccess controlは外側へ委譲する。

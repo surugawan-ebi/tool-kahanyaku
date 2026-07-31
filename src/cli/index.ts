@@ -2,6 +2,7 @@
 import { Command, CommanderError } from "commander";
 import { registerInitCommand } from "./commands/init.js";
 import { registerMcpCommand } from "./commands/mcp.js";
+import { registerMcpHttpCommand } from "./commands/mcpHttp.js";
 import { registerListCommand } from "./commands/list.js";
 import { registerSearchCommand } from "./commands/search.js";
 import { registerShowCommand } from "./commands/show.js";
@@ -30,6 +31,7 @@ export function buildProgram(): Command {
 
   registerInitCommand(program);
   registerMcpCommand(program);
+  registerMcpHttpCommand(program);
   registerListCommand(program);
   registerSearchCommand(program);
   registerShowCommand(program);

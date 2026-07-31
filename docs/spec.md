@@ -1,6 +1,6 @@
 ---
 title: 加判役（Kahanyaku）MVP Spec
-updated: 2026-07-10
+updated: 2026-07-30
 summary: AIエージェント向け社内ナレッジを、承認、履歴、引用、信頼度つきで管理するOSSワークフローのMVP仕様
 ---
 
@@ -54,7 +54,7 @@ MVPでは以下をやらない。
 - HTMLレンダリング
 - Google Docs / Slack / Notionとの同期
 
-MVPの中心は、OSSとしてローカルで動くMCPサーバとCLI。  
+MVPの中心は、OSSとしてself-hostできるMCPサーバとCLI。ローカルstdioを既定経路とし、remote利用にはopt-inのStreamable HTTP transportを提供する。
 チーム利用を想定したroles/review workflowは持つが、MVPでは認証基盤やWeb管理画面は作らない。
 
 ## MVP Decisions
@@ -70,6 +70,10 @@ MVPの中心は、OSSとしてローカルで動くMCPサーバとCLI。
 - 最初のユーザーは小規模チームや開発者、AI推進担当が、自分たちのローカル環境から使い始めるケース。部門ごとのreviewerによる本格的なチーム承認ワークフローはPhase 2以降で広げる
 - citationはMVPではnote単位で十分。将来のsection citationに備えてMarkdown見出しは保持する。`version`、`review_due_at`、`stale`は必ず含め、`note_id + version + updated_at`で根拠を後から追跡できるようにする
 - OSS coreとして別repoに切る。このrepoは企画、仕様、実装プロンプトの正本にする
+- remote transportはstatelessな`POST /mcp`とし、既定は`127.0.0.1`へbindする。non-loopback bindではHost allowlistを必須にし、browser Originはexact allowlist方式にする
+- TLS、認証、IP制限、VPN、rate limitは環境差が大きいため本体へ決め打ちせず、operator管理のreverse proxy/network layerへ委譲する。無保護internet公開は標準構成にしない
+- 共有HTTP endpointのactorはprocess起動時に固定し、全clientを同じservice actorとして記録する。認証情報や未検証headerをactorへ自動変換しない
+- remote最小構成は1 process / 1 replica / local persistent volumeのSQLiteとし、network filesystem共有やhorizontal scalingは対象外にする
 - ContextNestは先行仕様として参考にする。ただし加判役は検証可能なcontext vault仕様ではなく、日々の提案、レビュー、承認、配布を回す実務ワークフローに寄せる
 
 ## Core Objects
@@ -314,7 +318,7 @@ toolは役割ごとに3つのplaneへ分ける。
 ```json
 {
   "schema_version": "1",
-  "server_version": "0.3.0",
+  "server_version": "0.4.0",
   "strict_stale_filter": false,
   "scopes": [
     {
@@ -1034,7 +1038,7 @@ MVPでは、OpenWiki風のcode analysisやdocs generationは範囲外にする�
 OSS coreで最初に出すもの:
 
 - TypeScript/Node.jsのCLI
-- local MCP server
+- local stdio MCP / opt-in self-hosted Streamable HTTP MCP
 - SQLite storage
 - Markdown import/export
 - proposal/review/approve workflow
@@ -1065,9 +1069,12 @@ OSS coreで最初に出すもの:
 - 履歴を消さない
 - prompt injection対策として、ノート本文とツール指示を混同しない
 - actor、role、scopeをhistoryに残し、将来のRBAC/監査へ接続できるようにする
+- remote HTTPのHost/Originを検証する。認証、TLS、rate limit、request size、監視は外部layerの責務であり、加判役が提供すると誤認させない
 
 MVPでは完全な権限管理は提供しない。
 agent-facing MCPにはverifiedへ直接変更する経路を作らないが、同じOS userでshellとCLIへアクセスできるagentを加判役単体で阻止するものではない。操作境界と履歴はworkflowの統制と追跡を助けるものであり、強い認証、OS上の権限分離、改ざん耐性のある監査基盤の代替ではない。
+
+remote MCPを無保護で公開した場合、第三者はverified knowledge、review item、履歴を読み、draft・更新提案・archive推薦を作成できる。approve toolがないことは機密性、可用性、容量枯渇を守らない。internetから到達させる場合は、利用者がreverse proxyまたはprivate networkでTLSとaccess controlを強制する。
 
 ## README Requirements
 
@@ -1091,9 +1098,9 @@ READMEに含める内容:
 
 ## Roadmap
 
-### Phase 1: OSS Local Governed MVP
+### Phase 1: OSS Governed MVP
 
-- ローカルMCPサーバ
+- local stdio MCP / opt-in self-hosted Streamable HTTP MCP
 - SQLite
 - Markdown import/export
 - MCP: registry overview/search/read/context pack/create draft/update draft/propose update/archive推薦/review status確認/履歴取得（11 tools）
@@ -1149,6 +1156,7 @@ READMEに含める内容:
 - `npm test` が通る
 - `kahanyaku init` で初期化できる
 - `kahanyaku mcp` でMCPサーバを起動できる
+- `kahanyaku mcp-http`でlocalhostのstateless Streamable HTTP MCPを起動でき、non-loopbackではHost allowlistなしに起動できない
 - MCP toolとして `get_registry_overview` / `search_notes` / `get_note` / `get_context_pack` / `create_note_draft` / `update_draft` / `propose_note_update` / `recommend_archive` / `list_review_items` / `get_review_item` / `get_note_history` が使える（11 tools）
 - CLIからノートの検索、表示、承認、却下、archiveができる
 - `kahanyaku audit`でhistory eventをjsonl/csv exportできる

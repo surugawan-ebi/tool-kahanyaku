@@ -75,7 +75,7 @@ npm run demo
 
 ## MVPでできること
 
-- ローカルで動く MCP サーバと CLI（SaaS化・ログイン・課金・Web UIはなし）
+- ローカルstdio MCP、opt-inのself-hosted Streamable HTTP MCP、CLI（SaaS化・ログイン・課金・Web UIはなし）
 - draft 作成 → レビュー → 承認 → verified 化 → 検索・引用、という一連のワークフロー
 - 既存verified noteへの更新提案（update proposal）と optimistic lock（`version` 不一致時は `needs_rebase`）
 - 古くなった知識のarchive提案（`recommend_archive`）。承認されるとnoteがarchivedになる
@@ -129,6 +129,11 @@ kahanyaku init [--data-dir <dir>]
 
 # MCP stdioサーバを起動（AIクライアントから接続する）
 kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
+
+# Streamable HTTP MCPを起動（既定はlocalhost、認証・TLSは外部で付与）
+kahanyaku mcp-http [--actor <actor>] [--data-dir <dir>] \
+  [--host 127.0.0.1] [--port 3000] \
+  [--allowed-host <hostname>] [--allowed-origin <origin>]
 ```
 
 データディレクトリの解決順は `--data-dir` > 環境変数 `KAHANYAKU_HOME` > カレントの `./.kahanyaku/` です。actorの解決順は `--actor` > 環境変数 `KAHANYAKU_ACTOR` > config の `default_actor` > OSユーザー名です。
@@ -185,6 +190,8 @@ max_body_chars: 8000
 
 ## MCPクライアントからの接続方法
 
+### ローカルstdio
+
 stdio transportで起動するため、Claude Desktop や `.mcp.json` 形式で設定できるMCPクライアントから直接呼び出せます。
 
 **Claude Desktop（`claude_desktop_config.json`）:**
@@ -222,6 +229,22 @@ stdio transportで起動するため、Claude Desktop や `.mcp.json` 形式で�
 
 actor は MCP tool の入力からは受け取りません。stdio transport は MCP client ごとに別プロセスが起動するため、プロセス単位の `env`（`KAHANYAKU_ACTOR`）や `--actor` でエージェントを識別します。
 
+### Self-hosted Streamable HTTP
+
+`kahanyaku mcp-http`は、request/response型の11 toolsをstatelessな`POST /mcp`で提供します。既定bindは`127.0.0.1:3000`です。non-loopbackへbindする場合はHost header検証用の`--allowed-host`が必須で、browserの`Origin` headerは`--allowed-origin`で完全一致許可しない限り拒否します。
+
+```bash
+kahanyaku mcp-http \
+  --host 0.0.0.0 \
+  --port 3000 \
+  --allowed-host mcp.example.com \
+  --actor agent:remote-mcp
+```
+
+このHTTP serverには認証、TLS、CORS、rate limit、利用者別actor mappingがありません。通常は直接internetへ公開せず、Caddy等のHTTPS reverse proxy、Bearer/Basic/OAuth、IP allowlist、VPN、private networkから必要な方式を外側で強制してください。共有HTTP processでは、接続した全clientが起動時の同一actorとして記録されます。
+
+Docker Compose、CaddyのBearer/Basic例、無認証構成の危険性、Codex/Claudeからの接続方法は[`docs/server-deployment.md`](./docs/server-deployment.md)を参照してください。
+
 ## AIクライアント向け利用プロトコル
 
 1. **接続直後にまず `get_registry_overview` を呼ぶ。** scope構成・context_pack構成・note件数・`usage_policy`・`recommended_first_steps` が一度に把握でき、何も知らない状態で `search_notes` を手探りするのを防ぐ。
@@ -256,6 +279,7 @@ mutating tool（`create_note_draft` / `update_draft` / `propose_note_update` / `
 ```text
 kahanyaku init [--data-dir <dir>]
 kahanyaku mcp [--actor <actor>] [--data-dir <dir>]
+kahanyaku mcp-http [--actor <actor>] [--data-dir <dir>] [--host <host>] [--port <port>] [--allowed-host <hostname>]... [--allowed-origin <origin>]...
 kahanyaku list [--pending] [--scope <s>] [--status <st>]
 kahanyaku search <query> [--include-archived] [--scope <s>] [--limit <n>]
 kahanyaku show <note_id|proposal_id>
@@ -313,8 +337,8 @@ Apache License 2.0 で公開しています（[LICENSE](./LICENSE)）。Issue・
 
 ## ロードマップ
 
-**Phase 1: OSS Local Governed MVP（本リポジトリの現状）**
-ローカルMCPサーバ、SQLite、Markdown import/export、11 MCP tools（`get_context_pack`・`recommend_archive`・`get_note_history`を含む）、LIKE/FTS5(trigram)切り替え検索、scope別reviewer強制とreviewer_separation強制（enforceモード、maintainer break-glass）、CLIによるapprove/reject/archive/import/export/audit、履歴管理とconfig_hashによる決定時点のpolicy追跡、example vault。
+**Phase 1: OSS Governed MVP（本リポジトリの現状）**
+ローカルstdio MCP、opt-inのself-hosted Streamable HTTP MCP、SQLite、Markdown import/export、11 MCP tools（`get_context_pack`・`recommend_archive`・`get_note_history`を含む）、LIKE/FTS5(trigram)切り替え検索、scope別reviewer強制とreviewer_separation強制（enforceモード、maintainer break-glass）、CLIによるapprove/reject/archive/import/export/audit、履歴管理とconfig_hashによる決定時点のpolicy追跡、example vault。
 
 **Phase 2: Team Workflow Pack**
 policy設定のさらなる拡張、due date/stale検出の高度化、CLIでのreview queue改善、import時のproposal生成改善、source種別ごとの厳格な承認条件、policy変更履歴の本格対応。

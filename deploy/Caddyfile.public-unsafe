@@ -1,0 +1,8 @@
+# DANGER: This publishes the MCP endpoint without authentication.
+# Anyone who can reach this hostname can read verified knowledge and submit
+# drafts/proposals as the fixed service actor. Use only behind an independently
+# enforced IP allowlist, VPN/private network, or authentication gateway.
+
+{$KAHANYAKU_DOMAIN} {
+	reverse_proxy kahanyaku:3000
+}

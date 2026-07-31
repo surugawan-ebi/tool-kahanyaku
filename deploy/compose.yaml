@@ -1,0 +1,78 @@
+name: kahanyaku
+
+services:
+  kahanyaku:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    command:
+      - mcp-http
+      - --host
+      - 0.0.0.0
+      - --port
+      - "3000"
+      - --allowed-host
+      - ${KAHANYAKU_PUBLIC_HOST:?Set KAHANYAKU_PUBLIC_HOST in deploy/.env}
+      - --actor
+      - ${KAHANYAKU_ACTOR:-agent:remote-mcp}
+      - --data-dir
+      - /var/lib/kahanyaku
+    environment:
+      KAHANYAKU_ACTOR: ${KAHANYAKU_ACTOR:-agent:remote-mcp}
+      KAHANYAKU_HOME: /var/lib/kahanyaku
+      KAHANYAKU_PUBLIC_HOST: ${KAHANYAKU_PUBLIC_HOST:?Set KAHANYAKU_PUBLIC_HOST in deploy/.env}
+    expose:
+      - "3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          const http = require("node:http");
+          const request = http.get({hostname: "127.0.0.1", port: 3000,
+          path: "/healthz", headers: {Host: process.env.KAHANYAKU_PUBLIC_HOST}},
+          (response) => process.exit(response.statusCode === 200 ? 0 : 1));
+          request.on("error", () => process.exit(1))
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    init: true
+    restart: unless-stopped
+    volumes:
+      - kahanyaku-data:/var/lib/kahanyaku
+    networks:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      kahanyaku:
+        condition: service_healthy
+    environment:
+      KAHANYAKU_BASIC_USER: ${KAHANYAKU_BASIC_USER:?Set KAHANYAKU_BASIC_USER in deploy/.env}
+      KAHANYAKU_CADDY_SECRET: ${KAHANYAKU_CADDY_SECRET:?Set a Bearer token or Caddy password hash in deploy/.env}
+      KAHANYAKU_DOMAIN: ${KAHANYAKU_DOMAIN:?Set KAHANYAKU_DOMAIN in deploy/.env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    restart: unless-stopped
+    volumes:
+      - ${KAHANYAKU_CADDYFILE:-./Caddyfile.bearer.example}:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - backend
+      - frontend
+
+networks:
+  backend:
+    internal: true
+  frontend:
+
+volumes:
+  caddy-config:
+  caddy-data:
+  kahanyaku-data:
