@@ -47,13 +47,13 @@
 - 司令塔は委譲成果、差分、test結果を自身で確認する。委譲しても統合責任と最終責任は移らない。
 - CodexとClaudeの相互レビューは、利用可能かつ安全な場合に追加で行う。外部cross-reviewだけを、利用可能な内部サブエージェントの代用にしない。
 
-### 最上位モデルの役割
+### LUNA主担当と上位サブエージェント
 
-- 「最上位モデル」は、現在のsessionで利用可能な汎用推論modelのうち最も高い能力を持つmodelを指す。Sol、Fable、Opus等の現在名や将来の後継modelへ固定しない。
-- ユーザーまたは実行環境の明示指定を優先する。能力順位を確定できない場合は現在のmain sessionを最上位モデルとして扱い、外部modelの優劣を推測で断定しない。
-- 最上位モデルは司令塔・統合責任者として、要件理解、正本確認、scope決定、task分解、委譲判断、成果レビュー、統合、最終検証、報告を担当する。
+- 「上位エスカレーションmodel」は、現在のsessionで利用可能な汎用推論modelのうち最も高い能力を持つmodelを指す。Sol、Fable、Opus等の現在名や将来の後継modelへ固定しない。
+- ユーザーまたは実行環境の明示指定を優先する。能力順位を確定できない場合は現在のmain sessionをLUNA主担当として扱い、外部modelの優劣を推測で断定しない。
+- LUNAは通常の主担当・統合責任者として、要件理解、正本確認、scope決定、task分解、委譲判断、成果レビュー、統合、最終検証、報告を担当する。
 - 小規模、密結合、調整中心の作業は直接処理してよい。分離可能な実装、調査、機械的作業、独立レビューは利用可能な他modelやsub-agentへ明確な範囲で委譲する。
-- 委譲しても最上位モデルが正確性、安全性、既存差分の保護、プロジェクト固有ルールへの適合を担保する。
+- 委譲してもLUNAが正確性、安全性、既存差分の保護、プロジェクト固有ルールへの適合を担保する。
 
 ### CodexとClaudeの相互分担・レビュー
 
@@ -61,7 +61,7 @@
 - Codex主担当時はClaudeへ広範囲のcode読解、設計レビュー、独立実装案、差分レビューを依頼することを推奨する。
 - 実質的な変更では、両方が利用可能で安全なら、完了前にCodexとClaude間で少なくとも1回の独立cross-reviewを行うことを強く推奨する。
 - cross-review依頼には対象repo、対象file、目的、編集可否、制約、期待成果、検証方法を明記し、秘密情報、認証情報、本番値、個人情報を渡さない。
-- 結果をそのまま採用せず、呼び出し元と最上位モデルが差分、生成物、test結果を確認する。
+- 結果をそのまま採用せず、呼び出し元とLUNAが差分、生成物、test結果を確認する。
 - 利用不可、利用上限、秘密情報、live本番状態等で実行できない場合は、理由と代替検証を記録する。
 
 ### Git公開依頼の安全な解釈
@@ -76,3 +76,12 @@
 - 「全部」であっても無関係repo、別worktree、submodule、未指定の秘密・生成物まで含むとは解釈しない。対象repo内の意図された変更だけを列挙して公開する。
 - 完了時はcommit hash、push先、PR URL、含めた変更、除外した差分、test結果を報告する。
 <!-- END managed:initialize-managed-repo:agents -->
+
+<!-- BEGIN managed:github-access-policy:v1 -->
+## GitHubアクセスの標準経路
+
+- clone、fetch、pull、branch、commit、push、Draft PR、Ready化、mergeは、接続済みの`workspace-git` MCPを第一選択とし、prepare → 会話承認ボタン → executeの境界を守る。
+- `workspace-git`が拒否・未接続・未実装の場合、直接`git`／`gh`／GitHub MCPへ迂回しない。MCP未実装のread-only確認だけは、理由と対象を説明して明示承認を得た場合に限り別経路を検討する。
+- Git transportのoriginは同じowner／repositoryを指すSSH URLに限定する。remote変更前に現在の接続先を確認し、非GitHub remote、CI専用checkout、submodule、runtime vendor、ignoreされたnested repositoryへ機械的に適用しない。
+- 秘密鍵path、token、credential値をrepository、ログ、prompt、knowledge本文へ保存しない。通信経路の標準化はcommit、push、PR作成、mergeの許可範囲を拡張しない。
+<!-- END managed:github-access-policy:v1 -->
