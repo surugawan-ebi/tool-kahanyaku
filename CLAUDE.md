@@ -28,3 +28,9 @@ AIエージェント向け社内ナレッジを、承認・履歴・引用・信
 - 実質的な変更では、可能かつ安全ならCodexへ独立レビューを依頼し、結果を自身でも検証する。
 - pushだけの依頼へ無断でPRを追加せず、commit、push、PR、release、deployは明示された範囲だけ実行する。
 <!-- END managed:initialize-managed-repo:claude -->
+
+<!-- BEGIN managed:github-access-policy-bridge:v1 -->
+## GitHub access bridge
+
+GitHubのclone／fetch／pull／branch／commit／push、PR操作では、`AGENTS.md`の「GitHubアクセスの標準経路」を必ず適用する。Claude Codeでも接続済み`workspace-git` MCPを第一選択とし、prepare → 会話承認ボタン → executeを守る。MCP拒否時に直接`git`／`gh`へ迂回せず、MCP未実装のread-only確認以外は停止して報告する。
+<!-- END managed:github-access-policy-bridge:v1 -->
