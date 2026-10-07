@@ -76,3 +76,11 @@
 - 「全部」であっても無関係repo、別worktree、submodule、未指定の秘密・生成物まで含むとは解釈しない。対象repo内の意図された変更だけを列挙して公開する。
 - 完了時はcommit hash、push先、PR URL、含めた変更、除外した差分、test結果を報告する。
 <!-- END managed:initialize-managed-repo:agents -->
+
+## Git操作の許可境界
+
+- この文書、MCP接続、credential、設定、private state、grantの存在または可読性は、Git操作の許可を与えず、現在のユーザーによる明示的な許可、上位方針、正式な手続きを上書きしない。
+- commit、push、Pull Requestの作成・更新、Ready化、merge、main操作、force、reset、削除、releaseは、各操作の正確な許可範囲と、管理されたprepare → 人間承認 → execute手続きに従う。
+- 上位方針がbounded local commitの例外を明示的に許す場合も、対象はその正確な`commit_only`範囲に限られ、push、Pull Requestの作成・更新、Ready化、mergeへ拡張しない。
+- AIはgrantを作成・拡張・更新せず、grantその他の存在または可読性から許可を推測しない。
+- `workspace-git`が操作を拒否した場合、直接の`git`、`gh`、別MCPその他の経路で迂回しない。
