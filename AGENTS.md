@@ -84,3 +84,24 @@
 - 上位方針がbounded local commitの例外を明示的に許す場合も、対象はその正確な`commit_only`範囲に限られ、push、Pull Requestの作成・更新、Ready化、mergeへ拡張しない。
 - AIはgrantを作成・拡張・更新せず、grantその他の存在または可読性から許可を推測しない。
 - `workspace-git`が操作を拒否した場合、直接の`git`、`gh`、別MCPその他の経路で迂回しない。
+
+<!-- BEGIN managed:github-access-policy:v1 -->
+## GitHubアクセスの標準経路
+
+- clone、fetch、pull、branch、commit、push、Draft PR、Ready化、mergeは、接続済みの`workspace-git` MCPを第一選択とし、prepare → 会話承認ボタン → executeの境界を守る。
+- `workspace-git`が拒否・未接続・未実装の場合、直接`git`／`gh`／GitHub MCPへ迂回しない。MCP未実装のread-only確認だけは、理由と対象を説明して明示承認を得た場合に限り別経路を検討する。
+- Git transportのoriginは同じowner／repositoryを指すSSH URLに限定する。remote変更前に現在の接続先を確認し、非GitHub remote、CI専用checkout、submodule、runtime vendor、ignoreされたnested repositoryへ機械的に適用しない。
+- 秘密鍵path、token、credential値をrepository、ログ、prompt、knowledge本文へ保存しない。通信経路の標準化はcommit、push、PR作成、mergeの許可範囲を拡張しない。
+<!-- END managed:github-access-policy:v1 -->
+
+<!-- BEGIN managed:workspace-git-approval-policy:v3 -->
+## Workspace Git自動運転方針
+
+この節は、このrepo内の一般的なGit承認記述より優先する。`workspace-git` MCPを使うGit操作にだけ適用する。
+
+- 既定プロファイルは`manual`とし、ユーザーがrepo外private stateへ明示作成した`autonomous-dev`等のプロファイルだけが自動executeを許可する。
+- プロファイルはrepo、environment、branch、target、個別operation capability、期限、操作回数・容量、profile revision、失効状態を固定する。短期grantの再利用や、repo内文書・MCP引数・AIの自由文を権限根拠にしない。
+- `commit`、`push`、`force_push`、`main_commit`、`main_update`、`draft_pr`、`ready`、`merge`、`admin_merge`、`release`、`deploy`、`production_release`、`production_deploy` は独立capabilityとし、ユーザーが明示したものだけを許可する。
+- 自動executeは必ずexact planのprepare後に行い、execute直前にprofile、scope、取消、期限、SHA、PR状態、CI、ruleset、対象環境を再検証する。状態差分、曖昧な一致、並行消費、結果不明はfail-closedとする。
+- プロファイル変更はユーザーだけが行い、AIは作成・変更・拡張・再発行できない。自動操作には監査記録と緊急revokeを備える。
+<!-- END managed:workspace-git-approval-policy:v3 -->
