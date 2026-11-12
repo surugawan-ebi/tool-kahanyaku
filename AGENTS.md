@@ -105,3 +105,12 @@
 - 自動executeは必ずexact planのprepare後に行い、execute直前にprofile、scope、取消、期限、SHA、PR状態、CI、ruleset、対象環境を再検証する。状態差分、曖昧な一致、並行消費、結果不明はfail-closedとする。
 - プロファイル変更はユーザーだけが行い、AIは作成・変更・拡張・再発行できない。自動操作には監査記録と緊急revokeを備える。
 <!-- END managed:workspace-git-approval-policy:v3 -->
+
+## Task completion and workspace cleanup
+
+- Cleanup is part of the task owner's responsibility. Report implementation, validation, publication/merge, and cleanup separately; a saved PR is not a merge into the target branch.
+- Delete only the task's local and remote topic branches after verifying the PR was merged, the intended changes are preserved in the target branch (including squash/rebase merges), and no other PR or active work depends on them. Never include default, shared, or protected branches.
+- For a PR-only request, keep the review-pending branch. Do not merge a PR merely to allow cleanup. A temporary clone may be cleaned independently once its required work is durably saved and can be retrieved again, provided no active work depends on that clone.
+- Before cleaning a temporary clone, verify its exact identity and ownership, saved results, absence of unsaved staged/unstaged/untracked work, and absence of active executions or dependent work. Use the documented cleanup lifecycle and reconcile its lease/registry records; do not delete directories or edit registry state as a substitute.
+- If a branch or clone must remain, record the reason, responsible owner, next action, and review date. Report blocked or unverified cleanup as pending, not complete.
+- These responsibilities do not grant new deletion, merge, or publication permissions. Preserve existing approval, lease, identity, snapshot, and safety checks. If a supported cleanup route is unavailable or refuses the action, stop that action and report the specific blocker without bypassing it.
