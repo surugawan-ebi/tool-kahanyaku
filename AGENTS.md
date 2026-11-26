@@ -88,8 +88,8 @@
 <!-- BEGIN managed:github-access-policy:v1 -->
 ## GitHubアクセスの標準経路
 
-- clone、fetch、pull、branch、commit、push、Draft PR、Ready化、mergeは、接続済みの`workspace-git` MCPを第一選択とし、prepare → 会話承認ボタン → executeの境界を守る。
-- `workspace-git`が拒否・未接続・未実装の場合、直接`git`／`gh`／GitHub MCPへ迂回しない。MCP未実装のread-only確認だけは、理由と対象を説明して明示承認を得た場合に限り別経路を検討する。
+- 通常のclone、fetch、pull、branch、commit、pushは標準Git、Pull Requestの確認・作成・更新、Ready化、mergeは認証済みの`gh`を使用できる。各操作に必要な承認と保護規則は既存の規定に従う。
+- `workspace-git` MCPを使う場合は、prepare → 会話承認ボタン → executeの境界を守る。MCPによる安全上の拒否や、失敗・partial・結果不明の操作を直接`git`／`gh`／別MCPで迂回・再実行しない。MCPの未接続・未実装だけを理由に、通常Gitの利用を禁止しない。
 - Git transportのoriginは同じowner／repositoryを指すSSH URLに限定する。remote変更前に現在の接続先を確認し、非GitHub remote、CI専用checkout、submodule、runtime vendor、ignoreされたnested repositoryへ機械的に適用しない。
 - 秘密鍵path、token、credential値をrepository、ログ、prompt、knowledge本文へ保存しない。通信経路の標準化はcommit、push、PR作成、mergeの許可範囲を拡張しない。
 <!-- END managed:github-access-policy:v1 -->
