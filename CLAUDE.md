@@ -32,5 +32,5 @@ AIエージェント向け社内ナレッジを、承認・履歴・引用・信
 <!-- BEGIN managed:github-access-policy-bridge:v1 -->
 ## GitHub access bridge
 
-GitHubのclone／fetch／pull／branch／commit／push、PR操作では、`AGENTS.md`の「GitHubアクセスの標準経路」を必ず適用する。Claude Codeでも通常操作に標準Git／認証済み`gh`を使用でき、必要な承認と保護規則を守る。`workspace-git` MCPを使う場合のprepare → 会話承認ボタン → executeと、有効なユーザー作成profileによる例外は`AGENTS.md`の「Workspace Git自動運転方針」に従う。MCPの安全上の拒否や失敗・partial・結果不明を別経路で迂回・再実行しない。
+GitHubのclone／fetch／pull／branch／commit／push、PR操作では、`AGENTS.md`の「GitHubアクセスの標準経路」を必ず適用する。Git操作とPRの作成・Ready化・mergeには接続済みのLocal Git MCP v2を使い、push・Draft PR・Ready化・mergeは`AGENTS.md`の「Local Git MCP v2の承認方針」に従って会話承認ボタンで承認を得る。MCPの安全上の拒否や失敗・partial・結果不明を別経路で迂回・再実行しない。
 <!-- END managed:github-access-policy-bridge:v1 -->
