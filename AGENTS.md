@@ -83,28 +83,27 @@
 - commit、push、Pull Requestの作成・更新、Ready化、merge、main操作、force、reset、削除、releaseは、各操作の正確な許可範囲と、管理されたprepare → 人間承認 → execute手続きに従う。
 - 上位方針がbounded local commitの例外を明示的に許す場合も、対象はその正確な`commit_only`範囲に限られ、push、Pull Requestの作成・更新、Ready化、mergeへ拡張しない。
 - AIはgrantを作成・拡張・更新せず、grantその他の存在または可読性から許可を推測しない。
-- `workspace-git`が操作を拒否した場合、直接の`git`、`gh`、別MCPその他の経路で迂回しない。
+- Local Git MCP v2が操作を拒否した場合、直接の`git`、`gh`、別MCPその他の経路で迂回しない。
 
 <!-- BEGIN managed:github-access-policy:v1 -->
 ## GitHubアクセスの標準経路
 
 - 通常のclone、fetch、pull、branch、commit、pushは標準Git、Pull Requestの確認・作成・更新、Ready化、mergeは認証済みの`gh`を使用できる。各操作に必要な承認と保護規則は既存の規定に従う。
-- `workspace-git` MCPを使う場合は、prepare → 会話承認ボタン → executeの境界を守る。MCPによる安全上の拒否や、失敗・partial・結果不明の操作を直接`git`／`gh`／別MCPで迂回・再実行しない。MCPの未接続・未実装だけを理由に、通常Gitの利用を禁止しない。
+- Local Git MCP v2を使う場合は、`push`・`create_draft_pr`・`mark_ready`・`merge`ごとに会話承認ボタンで承認を得る。MCPによる安全上の拒否や、失敗・partial・結果不明の操作を直接`git`／`gh`／別MCPで迂回・再実行しない。MCPの未接続・未実装だけを理由に、通常Gitの利用を禁止しない。
 - Git transportのoriginは同じowner／repositoryを指すSSH URLに限定する。remote変更前に現在の接続先を確認し、非GitHub remote、CI専用checkout、submodule、runtime vendor、ignoreされたnested repositoryへ機械的に適用しない。
 - 秘密鍵path、token、credential値をrepository、ログ、prompt、knowledge本文へ保存しない。通信経路の標準化はcommit、push、PR作成、mergeの許可範囲を拡張しない。
 <!-- END managed:github-access-policy:v1 -->
 
-<!-- BEGIN managed:workspace-git-approval-policy:v3 -->
-## Workspace Git自動運転方針
+<!-- BEGIN managed:local-git-mcp-v2-approval-policy:v1 -->
+## Local Git MCP v2の承認方針
 
-この節は、このrepo内の一般的なGit承認記述より優先する。`workspace-git` MCPを使うGit操作にだけ適用する。
+この節は、このrepo内の一般的なGit承認記述より優先する。Local Git MCP v2（`git` tool）を使うGit操作に適用し、上位workspaceの承認・安全規則を緩和しない。旧`workspace-git` MCPとその自動運転プロファイル・prepare / execute・grantは2026-11-26に廃止済みで、使わない。
 
-- 既定プロファイルは`manual`とし、ユーザーがrepo外private stateへ明示作成した`autonomous-dev`等のプロファイルだけが自動executeを許可する。
-- プロファイルはrepo、environment、branch、target、個別operation capability、期限、操作回数・容量、profile revision、失効状態を固定する。短期grantの再利用や、repo内文書・MCP引数・AIの自由文を権限根拠にしない。
-- `commit`、`push`、`force_push`、`main_commit`、`main_update`、`draft_pr`、`ready`、`merge`、`admin_merge`、`release`、`deploy`、`production_release`、`production_deploy` は独立capabilityとし、ユーザーが明示したものだけを許可する。
-- 自動executeは必ずexact planのprepare後に行い、execute直前にprofile、scope、取消、期限、SHA、PR状態、CI、ruleset、対象環境を再検証する。状態差分、曖昧な一致、並行消費、結果不明はfail-closedとする。
-- プロファイル変更はユーザーだけが行い、AIは作成・変更・拡張・再発行できない。自動操作には監査記録と緊急revokeを備える。
-<!-- END managed:workspace-git-approval-policy:v3 -->
+- v2はMCP側に承認記録・自動運転プロファイル・operation IDを持たない。承認境界はクライアントが守り、`push`、`create_draft_pr`、`mark_ready`、`merge`はそれぞれ、exact planの提示後に構造化承認を得てから各1回だけ実行する。ある操作の承認を別の操作へ流用しない。
+- `mark_ready`と`merge`はPR番号と承認したfull head `sha`が必須で、同じrepo内・登録で許可した向き先・非保護headのPRだけを扱う。merge方式は登録の`mergeMethod`で決まる。実行直前にheadが承認したSHAのままであることを確認する。
+- 登録（`repos.json`の別名、向き先、`mergeMethod`、保護branch）の変更とアプリ再起動はユーザーの明示依頼がある場合だけ行い、拒否の回避に使わない。
+- v2が拒否した操作、未実装の操作（force push、reset、branch削除、PR本文更新、release、deploy）、結果不明の操作を直接git / ghで迂回しない。必要な場合は理由と影響を説明し、ユーザーの明示承認を得てから別経路を使う。
+<!-- END managed:local-git-mcp-v2-approval-policy:v1 -->
 
 ## Task completion and workspace cleanup
 
