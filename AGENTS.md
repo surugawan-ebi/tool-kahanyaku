@@ -101,8 +101,9 @@
 
 - v2はMCP側に承認記録・自動運転プロファイル・operation IDを持たない。承認境界はクライアントが守り、`push`、`create_draft_pr`、`mark_ready`、`merge`はそれぞれ、exact planの提示後に構造化承認を得てから各1回だけ実行する。ある操作の承認を別の操作へ流用しない。
 - `mark_ready`と`merge`はPR番号と承認したfull head `sha`が必須で、同じrepo内・登録で許可した向き先・非保護headのPRだけを扱う。merge方式は登録の`mergeMethod`で決まる。実行直前にheadが承認したSHAのままであることを確認する。
+- はmerge済みPRのheadブランチだけを、は登録でにした作業cloneだけを扱い、どちらもmergeとは別に構造化承認を得てから実行する。
 - 登録（`repos.json`の別名、向き先、`mergeMethod`、保護branch）の変更とアプリ再起動はユーザーの明示依頼がある場合だけ行い、拒否の回避に使わない。
-- v2が拒否した操作、未実装の操作（force push、reset、branch削除、PR本文更新、release、deploy）、結果不明の操作を直接git / ghで迂回しない。必要な場合は理由と影響を説明し、ユーザーの明示承認を得てから別経路を使う。
+- v2が拒否した操作、未実装の操作（force push、reset、merge済みPR以外のbranch削除、PR本文更新、release、deploy）、結果不明の操作を直接git / ghで迂回しない。必要な場合は理由と影響を説明し、ユーザーの明示承認を得てから別経路を使う。
 <!-- END managed:local-git-mcp-v2-approval-policy:v1 -->
 
 ## Task completion and workspace cleanup
